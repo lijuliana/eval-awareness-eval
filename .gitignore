@@ -1,0 +1,9 @@
+.claude/
+__pycache__/
+*.pyc
+data/transcripts/
+data/activations/
+*.npy
+*.pt
+*.safetensors
+.venv/
