@@ -284,20 +284,6 @@ Each is one thing other than awareness that could produce the result, with what 
 
 ## 7. Checklists
 
-**Activation judges** (Juliana can focus on these)
-- [ ] Get WorkspaceBench producers running on Qwen3.6-27B; confirm J-lens, NLA (layer 42),
-      oracle lens (layer 44, its own training prompt), activation oracle load and read a test
-      activation
-- [ ] Define the eval-token set for J-lens and logit lens scoring before seeing data
-- [ ] Write the readout-judge prompt (readout only, no prompt) and freeze it
-- [ ] Probe training script: standardize on train, select layer on validation
-- [ ] Transfer probe: load released ridge probe, apply at layer 42
-- [ ] Scoring script: every judge versus q, in-distribution and held-out, against the ceiling
-- [ ] TwinTempt read-only run: every judge on all 4 versions, paired scorer; compare with
-      the published reference readings
-- [ ] Information-access table and confabulation false-positive rate
-- [ ] Section of the report on judges
-
 **Data, generation, resampling, activations**
 - [ ] Download and integrity-check pairs; stratified sample of 300; near-duplicate clustering;
       frozen splits committed
@@ -320,6 +306,20 @@ Each is one thing other than awareness that could produce the result, with what 
 - [ ] Text baselines (majority, TF-IDF, keyword, LLM reader, prompt-only)
 - [ ] Blind review set; latent-awareness analysis (q on silent versus later-verbalizing traces)
 - [ ] Report draft, dev versus test tagging, reproducibility check
+
+**Activation judges** (Juliana can focus on these)
+- [ ] Get WorkspaceBench producers running on Qwen3.6-27B; confirm J-lens, NLA (layer 42),
+      oracle lens (layer 44, its own training prompt), activation oracle load and read a test
+      activation
+- [ ] Define the eval-token set for J-lens and logit lens scoring before seeing data
+- [ ] Write the readout-judge prompt (readout only, no prompt) and freeze it
+- [ ] Probe training script: standardize on train, select layer on validation
+- [ ] Transfer probe: load released ridge probe, apply at layer 42
+- [ ] Scoring script: every judge versus q, in-distribution and held-out, against the ceiling
+- [ ] TwinTempt read-only run: every judge on all 4 versions, paired scorer; compare with
+      the published reference readings
+- [ ] Information-access table and confabulation false-positive rate
+- [ ] Section of the report on judges
 
 ## 8. Cost estimate
 
