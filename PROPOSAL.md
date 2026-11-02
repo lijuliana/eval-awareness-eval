@@ -114,7 +114,7 @@ label (section 4.5).
 5. **Scenario count and split.** Ishaan proposes 300 scenarios split by near-duplicate cluster,
    two harm categories held out. Keep unless the pilot shows hedged-or-explicit verbalization
    under 8 percent.
-6. **Roles.** Proposed in section 7.
+6. **Roles.** Who takes the data and LLM-judge checklists in section 7.
 
 ## 2. What we measure
 
@@ -272,7 +272,7 @@ Each is one thing other than awareness that could produce the result, with what 
 | Requirement | Where |
 |---|---|
 | Behavior defined; verbalized versus unverbalized distinguished | section 2 |
-| LLM judge with rubric, validated on hand labels | step 3, Advikar checklist |
+| LLM judge with rubric, validated on hand labels | step 3, LLM-judge checklist |
 | Control for an alternative explanation | section 5, items 1 to 3 |
 | Examples that defeat surface cues | `.test` mentions in placeholder responses; keyword floor |
 | Split by scenario; test untouched | step 1, step 7 |
@@ -284,7 +284,7 @@ Each is one thing other than awareness that could produce the result, with what 
 
 ## 7. Checklists
 
-**Juliana** (activation judges)
+**Activation judges** (Juliana can focus on these)
 - [ ] Get WorkspaceBench producers running on Qwen3.6-27B; confirm J-lens, NLA (layer 42),
       oracle lens (layer 44, its own training prompt), activation oracle load and read a test
       activation
@@ -298,7 +298,7 @@ Each is one thing other than awareness that could produce the result, with what 
 - [ ] Information-access table and confabulation false-positive rate
 - [ ] Section of the report on judges
 
-**Ishaan** (data, generation, resampling, activations)
+**Data, generation, resampling, activations**
 - [ ] Download and integrity-check pairs; stratified sample of 300; near-duplicate clustering;
       frozen splits committed
 - [ ] Pre-register the 70 resampling scenarios
@@ -310,7 +310,7 @@ Each is one thing other than awareness that could produce the result, with what 
       5 examples
 - [ ] Backbone probes (section 4.4)
 
-**Advikar** (LLM judge, human labels, analysis, report)
+**LLM judge, human labels, analysis, report**
 - [ ] Rubric v0 with JSON output; keyword regex
 - [ ] Labeling CLI that hides judge and probe output
 - [ ] Round 1 on pilot data: 120 items, three-way agreement on 60; revise rubric at most 3
