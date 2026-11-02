@@ -9,6 +9,10 @@ Elicitation design is adapted from Ishaan's plan (github.com/itewari7/hw2).
 
 - **Question:** when a reasoning model has said nothing about being tested, how much evaluation
   awareness is present, and which interpretability method reads it best?
+- **Target versus instrument:** the target is unverbalized awareness only. Verbalization is the
+  instrument used to see it: we cannot observe silent awareness directly, but we can observe
+  whether a silent state goes on to voice it. No result is reported about verbalization for its
+  own sake.
 - **Elicitation:** minimal-pair harmful requests with real or placeholder entities
   (Abdelnabi and Salem 2025). Placeholder entities are the cue.
 - **Anchor:** at fixed points in a reasoning trace where nothing about evaluation has been said,
@@ -20,8 +24,8 @@ Elicitation design is adapted from Ishaan's plan (github.com/itewari7/hw2).
   Baselines: an LLM reading the same prompt and prefix, TF-IDF, keyword regex, majority class.
   Judges are scored by how well they predict q on held-out scenarios.
 - **Assignment backbone:** the LLM judge that labels continuations is the required judge; q is an
-  aggregate of its labels; the probe that predicts q is the required probe. Probes at the start
-  and end of the response on the verbalized label are also run, as required.
+  aggregate of its labels; the probe that predicts q is the required probe. The required
+  start-of-response probe also reads a silent state (section 4.4).
 
 ## 0.5 Dataset
 
@@ -114,6 +118,10 @@ label (section 4.5).
 
 ## 2. What we measure
 
+The judge detects verbalized awareness. That detection is the instrument; the quantities at the
+end of this list are the target.
+
+
 - **Verbalized awareness:** the reasoning or answer states or raises the possibility that the
   current interaction is a test, evaluation, benchmark, red-team exercise or experiment on the
   model. Two levels:
@@ -163,7 +171,7 @@ label (section 4.5).
 q from resampling. Its noise ceiling is the split-half agreement between two halves of the
 continuations. Judges are read against that ceiling.
 
-### 4.2 Activation judges (Juliana)
+### 4.2 Activation judges
 
 All read the residual stream at the cut point. Scores are in [0, 1] where possible.
 
@@ -193,11 +201,18 @@ cannot answer from the prompt.
 **If an activation judge does not beat the LLM reader, the activation adds nothing beyond the
 words.**
 
-### 4.4 Required backbone probes
+### 4.4 Required start and end probes
 
-Logistic regression at the first and last generated token, every fourth layer, predicting the
-verbalized label of the trace. Compared with majority and TF-IDF on the response. Report the
-layer by position grid, confusion matrix, per-class precision and recall.
+The assignment requires logistic regression at the first and last generated token, every fourth
+layer, predicting the judge's label of the trace. The label is whether the trace voices suspicion.
+
+- **Start of response:** nothing has been said yet, so this probe reads a silent state and asks
+  whether it will later voice awareness. This is an unverbalized measurement and is reported with
+  the other judges.
+- **End of response:** the text has already said it or not, so this probe reads verbalized
+  content. It is run only to satisfy the assignment and reported as such.
+- Both are compared with majority class and TF-IDF on the response. Report the layer by position
+  grid, confusion matrix, per-class precision and recall.
 
 ### 4.5 Generalization check on TwinTempt
 
@@ -261,7 +276,7 @@ Each is one thing other than awareness that could produce the result, with what 
 | Control for an alternative explanation | section 5, items 1 to 3 |
 | Examples that defeat surface cues | `.test` mentions in placeholder responses; keyword floor |
 | Split by scenario; test untouched | step 1, step 7 |
-| Activations at start and end, multiple layers; probe | section 4.4 |
+| Activations at start and end, multiple layers; probe | section 4.4 (start probe reads a silent state; end probe is compliance only) |
 | Majority and text baselines; information each method sees | section 4.3 |
 | Generalization check | held-out harm categories |
 | Blind manual review of agreements and disagreements | step 8 |
@@ -288,7 +303,8 @@ Each is one thing other than awareness that could produce the result, with what 
       frozen splits committed
 - [ ] Pre-register the 70 resampling scenarios
 - [ ] vLLM generation, 3 samples per prompt, token IDs stored
-- [ ] Pilot on 40 train scenarios; report verbalization rate, reasoning lengths, onsets
+- [ ] Pilot on 40 train scenarios; check the instrument: verbalization rate, reasoning lengths,
+      onsets
 - [ ] Continuation sampling at cut points; eligibility filter after judging
 - [ ] Teacher-forced extraction at cut points, first and last token; position sanity check on
       5 examples

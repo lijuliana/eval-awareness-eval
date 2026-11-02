@@ -4,11 +4,6 @@ Written before any data. Changes are logged at the bottom with a date.
 
 ## Hypotheses
 
-- **H1, cue effect.** Placeholder entities raise the verbalized-awareness rate relative to the matched
-  real-entity prompt. The released Qwen3 labels from Abdelnabi and Salem 2025 show a small
-  difference: 299 versus 264 of 2587 for explicit or hedged test suspicion, against 950 versus
-  543 for calling the scenario hypothetical. Ishaan's plan cites 22.9 percent for Qwen3-32B;
-  this needs checking against the paper.
 - **E1, latent awareness in silence.** Silent traces carry latent awareness. At a given cut point, q on traces that never
   verbalize is above zero and, within a prompt, comparable to q on traces that verbalize later.
   If q on silent traces is near zero, silence is informative and the project reports that.
@@ -52,3 +47,6 @@ Written before any data. Changes are logged at the bottom with a date.
 - 2026-11-02: first version.
 - 2026-11-02: target Qwen3.6-27B; oracle lens added; hedged suspicion counts as verbalized;
   TwinTempt used read-only, without the shortcut-taking anchor.
+- 2026-11-02: removed H1 (does the placeholder cue raise the verbalization rate). It was a
+  question about verbalization for its own sake. Whether the cue produces enough verbalization
+  to resample from is checked in the pilot instead.
