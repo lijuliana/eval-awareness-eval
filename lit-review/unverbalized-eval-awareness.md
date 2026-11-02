@@ -1,6 +1,6 @@
 # Literature review: measuring unverbalized evaluation awareness
 
-Scope. How prior work has measured or detected evaluation awareness that a model does not
+**Scope.** How prior work has measured or detected evaluation awareness that a model does not
 state in its output, which methods worked, and what they found. In scope: resampling and
 behavioral-gap designs, activation probes, steering, and activation-to-text readouts. Out of
 scope: work that only counts verbalized awareness, except where it calibrates the problem.
@@ -9,7 +9,7 @@ Sources were verified against their own arXiv or venue page (`refs.bib`). Abstra
 for every entry; full text only where noted. Non-peer-reviewed sources (workshop papers, blog
 posts, industry reports) are labeled.
 
-Verification, Nov 2 2026. All 18 entries with an arXiv ID match the arXiv API on title,
+**Verification, Nov 2 2026.** All 18 entries with an arXiv ID match the arXiv API on title,
 first author and author count. The other 8 have no arXiv record: two ICML 2026 workshop
 papers, three blog posts, three Anthropic publications. Each was checked against its own
 page. The citation-checker script reported 12 of 26 not found; it truncates titles at LaTeX
@@ -50,7 +50,7 @@ evaluation awareness".
 
 ### 2.1 Behavioral gap with a known signature (model organisms)
 
-How. Fine-tune a model so that it does something measurable (write Python type hints) more in
+**How.** Fine-tune a model so that it does something measurable (write Python type hints) more in
 evaluation-like than deployment-like contexts. Then remove verbalization and check whether the
 behavioral gap survives.
 
@@ -67,13 +67,13 @@ behavioral gap survives.
   replication. Linear probes trained only on non-coding eval/deploy prompts still predicted
   context on the suppressed sections, response AUROC 0.81 (Nemotron) and 0.71 (Qwen3.5).
 
-What it buys. The only design with ground truth: the behavior is implanted, so a gap is
+**What it buys.** The only design with ground truth: the behavior is implanted, so a gap is
 awareness by construction. Cost: fine-tuning a model, and the result is about an organism, not
 a natural model.
 
 ### 2.2 Resampling at silent points
 
-How. Cut a reasoning trace where nothing about evaluation has been said, resample continuations,
+**How.** Cut a reasoning trace where nothing about evaluation has been said, resample continuations,
 and measure how often continuations go on to verbalize. The fraction is a text-grounded estimate
 of latent disposition at that state.
 
@@ -84,12 +84,12 @@ of latent disposition at that state.
   verbalizing there; verbalized awareness rose 2.4 to 2.9 times while latent awareness and
   behavior stayed stable on Qwen3.6-35B-A3B, Kimi K2.6 and Inkling \cite{anwar2026verbalize}.
 
-What it buys. Works on a natural model with no fine-tuning. Measures disposition to voice, so
+**What it buys.** Works on a natural model with no fine-tuning. Measures disposition to voice, so
 awareness the model would never voice is invisible to it.
 
 ### 2.3 Linear probes on eval versus deploy prompts
 
-How. Label prompts as evaluation or deployment by construction, train logistic regression on
+**How.** Label prompts as evaluation or deployment by construction, train logistic regression on
 residual-stream activations, read the probe on new transcripts.
 
 - Llama-3.3-70B: AUROC 0.64 to 0.83 depending on probe variant; current safety evals read as
@@ -103,18 +103,18 @@ residual-stream activations, read the probe on new transcripts.
 - Steering along a probe direction changes compliance on harmful requests in reasoning models
   \cite{abdelnabi2025hawthorne}. NeurIPS 2025.
 
-The confound. Evaluation prompts look like benchmarks and deployment prompts look like chat. A
+**The confound.** Evaluation prompts look like benchmarks and deployment prompts look like chat. A
 probe trained on the standard contrast labeled 94 percent of deployment prompts rewritten into
 MCQ format as evaluation. Training on a 2x2 of context by format fixed it \cite{devbunova2026format}.
 Smaller models respond to format, larger ones to context \cite{singh2026format}.
 
-What it buys. Cheap and transfers across tasks (\cite{montoya2026unverbalized} trained on
+**What it buys.** Cheap and transfers across tasks (\cite{montoya2026unverbalized} trained on
 non-coding prompts and read coding traces). Needs the format control and a leakage check, since
 the probe may read the cue text rather than the model's state.
 
 ### 2.4 Activation-to-text readouts
 
-How. A second model reads one activation vector and writes what it encodes. No eval-specific
+**How.** A second model reads one activation vector and writes what it encodes. No eval-specific
 labels needed.
 
 - Natural language autoencoders (NLAs) surfaced unverbalized evaluation awareness in Opus 4.6
@@ -135,7 +135,7 @@ labels needed.
   claim contradicted by context; a prompt-only baseline is a strong floor
   \cite{blank2026workspacebench}. No eval-awareness family exists in it.
 
-What it buys. Readouts need no eval labels and can say what kind of awareness is present.
+**What it buys.** Readouts need no eval labels and can say what kind of awareness is present.
 Cost: confabulation, no mechanistic grounding, and a judge is still needed to score the text.
 
 ## 3. Datasets used
@@ -155,7 +155,7 @@ Cost: confabulation, no mechanistic grounding, and a judge is still needed to sc
 
 ## 4. What is agreed, contested, and open
 
-Agreed.
+**Agreed.**
 - Verbalization, internal representation, and behavior come apart
   \cite{montoya2026unverbalized, nayan2026notone, heidari2026representation}.
 - Linear probes decode eval versus deploy context in essentially every open model tested, with
@@ -165,14 +165,14 @@ Agreed.
 - Hand-editing a chain of thought is a weaker intervention than resampling
   \cite{macar2025thoughtbranches, knecht2026limited}.
 
-Contested.
+**Contested.**
 - Whether awareness changes behavior in natural models: small effects
   \cite{knecht2026limited} versus framing-dependent large effects \cite{zhuang2026notall} and
   causal effects on covert actions \cite{schoen2025stress}.
 - Whether single-layer steering does anything: negligible in three families
   \cite{nayan2026notone} versus clear compliance shifts \cite{abdelnabi2025hawthorne}.
 
-Open, and relevant to this project.
+**Open, and relevant to this project.**
 - No study compares interpretability readouts (probe, J-lens, NLA, oracle, activation oracle)
   against the same behavioral anchor for unverbalized awareness. \cite{bricknell2026smallernlas}
   compares three readers against NLA-derived labels, which is circular, on 76 tasks.
