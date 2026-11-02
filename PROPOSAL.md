@@ -321,7 +321,7 @@ Each is one thing other than awareness that could produce the result, with what 
 - [ ] Blind review set; latent-awareness analysis (q on silent versus later-verbalizing traces)
 - [ ] Report draft, dev versus test tagging, reproducibility check
 
-## 8. Budget (cap 200 dollars)
+## 8. Cost estimate
 
 - **GPU:** one H100 80 GB for Qwen3.6-27B. Generation, continuations, extraction, and the three
   verbalizing readers, which are adapters on the same base. About 12 to 16 hours, roughly 40
