@@ -9,6 +9,13 @@ Sources were verified against their own arXiv or venue page (`refs.bib`). Abstra
 for every entry; full text only where noted. Non-peer-reviewed sources (workshop papers, blog
 posts, industry reports) are labeled.
 
+Verification, Nov 2 2026. All 18 entries with an arXiv ID match the arXiv API on title,
+first author and author count. The other 8 have no arXiv record: two ICML 2026 workshop
+papers, three blog posts, three Anthropic publications. Each was checked against its own
+page. The citation-checker script reported 12 of 26 not found; it truncates titles at LaTeX
+braces and does not query arXiv IDs, and it also missed SAD and Hua et al. The NLA entry
+lists Anthropic as author because the byline could not be extracted from the page.
+
 Queries run (Oct 27 and Nov 2, 2026): "unverbalized evaluation awareness probe", "eval
 awareness steering probe reasoning model", "Towards Measuring and Detecting Unverbalized
 Evaluation Awareness", "Smaller NLAs and probes read eval awareness", "WorkspaceBench", "J-Lens
