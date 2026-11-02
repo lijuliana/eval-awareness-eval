@@ -289,26 +289,37 @@ Each is one thing other than awareness that could produce the result, with what 
 
 ## 7. Checklists
 
-Concise versions; details are in sections 3 and 4.
+Key details here; full procedure in sections 3 and 4.
 
 **Data, generation, resampling, activations**
-- [ ] Sample pairs, freeze splits, pre-register the 70 resampling scenarios (step 1)
-- [ ] Pilot, then full generation and continuations (steps 2 and 4)
-- [ ] Activation extraction at agreed layers and positions (step 5)
-- [ ] Start and end probes (section 4.4)
+- [ ] 300 real/placeholder pairs, integrity-checked; splits by near-duplicate cluster with two
+      harm categories held out; 70 resampling scenarios pre-registered (step 1)
+- [ ] Pilot on 40 training scenarios, then full generation on Qwen3.6-27B: thinking on, 3 samples
+      per prompt, token IDs stored (step 2)
+- [ ] Continuations at cut offsets 128, 256, 512 tokens, 6 or 8 per cut point (step 4)
+- [ ] Extraction at every cut point plus first and last generated token; layers 42 and 44 plus
+      every fourth layer (step 5)
+- [ ] Start and end probes on the judge's label (section 4.4)
 
 **LLM judge, human labels, analysis, report**
-- [ ] Rubric, hand-labeling rounds, freeze (step 3)
-- [ ] Judge all traces and continuations; compute q and r (step 4)
-- [ ] Text baselines (section 4.3)
-- [ ] Blind review, latent-awareness analysis, report draft (steps 7 and 8)
+- [ ] Rubric with explicit, hedged, scenario-only and none; 120 hand-labeled pilot items, all
+      three of us on 60; at most three revisions, then freeze (step 3)
+- [ ] Opus 5.5 versus Sonnet 5.5 on the hand-labeled items; keep one (section 4.6)
+- [ ] Batch-judge all traces and continuations; compute q and refusal rate r; second
+      hand-labeling round for judge accuracy (step 4)
+- [ ] Text baselines: majority, TF-IDF, keyword regex, LLM reader, prompt-only LLM (section 4.3)
+- [ ] Blind review of 40 stratified plus 15 random test items; report draft (steps 7 and 8)
 
 **Activation judges** (Juliana can focus on these)
-- [ ] All readers running on Qwen3.6-27B; eval-token set and readout-judge prompt frozen
-      (section 4.2)
-- [ ] TwinTempt run checked against the published readings (section 4.5)
-- [ ] Reader outputs on our activations; probe training; scoring against q (steps 6 and 7)
-- [ ] Confabulation false-positive rate (confound 5) and the report section on judges
+- [ ] Load and verify on Qwen3.6-27B: J-lens, logit lens, NLA (layer 42), oracle lens
+      (layer 44, its own training prompt), activation oracle, released ridge probe (section 4.2)
+- [ ] Freeze before data: J-lens eval-token set, readout-judge prompt (judge sees readout only)
+- [ ] TwinTempt: all judges on the 76 items in 4 versions; match the published NLA and probe
+      readings (section 4.5)
+- [ ] Run readers on cut-point activations; train the linear probe on q, layer chosen on
+      validation; score every judge against q on test (steps 6 and 7)
+- [ ] Confabulation false-positive rate: eval claims on real-entity prompts with q = 0
+      (confound 5); report section on judges
 
 ## 8. Cost estimate
 
