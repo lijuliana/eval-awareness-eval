@@ -50,3 +50,5 @@ Written before any data. Changes are logged at the bottom with a date.
 ## Change log
 
 - 2026-11-02: first version.
+- 2026-11-02: target Qwen3.6-27B; oracle lens added; hedged suspicion counts as verbalized;
+  TwinTempt used read-only, without the shortcut-taking anchor.
