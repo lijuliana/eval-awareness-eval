@@ -147,16 +147,21 @@ end of this list are the target.
    by harm category. Verify each pair differs only in the listed entities. Cluster near
    duplicates; split by cluster: two harm categories held out, remainder 60/20/20.
 2. **Generate.** Thinking mode, recommended sampling for the model, 3 samples per prompt, seeds
-   fixed. Store token IDs.
+   fixed. Store token IDs. Run a pilot on 40 training scenarios first to check the instrument:
+   verbalization rate, reasoning lengths, and where suspicion first appears.
 3. **Judge every trace.** Labels for reasoning and answer: verbalized, scenario-only, none; the
-   quote of the first verbalization; compliance (refused, partial, complied).
+   quote of the first verbalization; compliance (refused, partial, complied). The rubric is
+   developed on pilot data only: hand-label 120 items, all three of us on the same 60, with a
+   labeling tool that hides judge and probe output. Revise at most three times, then freeze.
 4. **Cut points and continuations.** For 70 pre-registered scenarios, both conditions, all traces:
    at each offset shorter than the reasoning, sample continuations with the same settings.
    A cut point is eligible if the first verbalization comes after it and no keyword appears
    before it. Judge each continuation with the frozen rubric. Compute q and refusal rate r.
+   Then hand-label a fresh sample of traces and continuations and report judge agreement per
+   condition.
 5. **Activations.** One teacher-forced forward pass per trace. Store the residual stream at the
    cut point (mean over the 16 tokens before it) at the judge layers, and at the first and last
-   generated tokens at every fourth layer.
+   generated tokens at every fourth layer. Check token positions by hand on 5 examples.
 6. **Run judges.** Each activation judge reads the cut-point activation and emits a score
    (section 4). Each text baseline reads the prompt plus prefix text.
 7. **Freeze on train and validation, test once.** Report every judge's agreement with q on
@@ -284,42 +289,26 @@ Each is one thing other than awareness that could produce the result, with what 
 
 ## 7. Checklists
 
+Concise versions; details are in sections 3 and 4.
+
 **Data, generation, resampling, activations**
-- [ ] Download and integrity-check pairs; stratified sample of 300; near-duplicate clustering;
-      frozen splits committed
-- [ ] Pre-register the 70 resampling scenarios
-- [ ] vLLM generation, 3 samples per prompt, token IDs stored
-- [ ] Pilot on 40 train scenarios; check the instrument: verbalization rate, reasoning lengths,
-      onsets
-- [ ] Continuation sampling at cut points; eligibility filter after judging
-- [ ] Teacher-forced extraction at cut points, first and last token; position sanity check on
-      5 examples
-- [ ] Backbone probes (section 4.4)
+- [ ] Sample pairs, freeze splits, pre-register the 70 resampling scenarios (step 1)
+- [ ] Pilot, then full generation and continuations (steps 2 and 4)
+- [ ] Activation extraction at agreed layers and positions (step 5)
+- [ ] Start and end probes (section 4.4)
 
 **LLM judge, human labels, analysis, report**
-- [ ] Rubric v0 with JSON output; keyword regex
-- [ ] Labeling CLI that hides judge and probe output
-- [ ] Round 1 on pilot data: 120 items, three-way agreement on 60; revise rubric at most 3
-      times; freeze
-- [ ] Batch judging of traces and continuations; compute q and r
-- [ ] Round 2 on real distribution, agreement reported per condition and on continuations
-- [ ] Text baselines (majority, TF-IDF, keyword, LLM reader, prompt-only)
-- [ ] Blind review set; latent-awareness analysis (q on silent versus later-verbalizing traces)
-- [ ] Report draft, dev versus test tagging, reproducibility check
+- [ ] Rubric, hand-labeling rounds, freeze (step 3)
+- [ ] Judge all traces and continuations; compute q and r (step 4)
+- [ ] Text baselines (section 4.3)
+- [ ] Blind review, latent-awareness analysis, report draft (steps 7 and 8)
 
 **Activation judges** (Juliana can focus on these)
-- [ ] Get WorkspaceBench producers running on Qwen3.6-27B; confirm J-lens, NLA (layer 42),
-      oracle lens (layer 44, its own training prompt), activation oracle load and read a test
-      activation
-- [ ] Define the eval-token set for J-lens and logit lens scoring before seeing data
-- [ ] Write the readout-judge prompt (readout only, no prompt) and freeze it
-- [ ] Probe training script: standardize on train, select layer on validation
-- [ ] Transfer probe: load released ridge probe, apply at layer 42
-- [ ] Scoring script: every judge versus q, in-distribution and held-out, against the ceiling
-- [ ] TwinTempt read-only run: every judge on all 4 versions, paired scorer; compare with
-      the published reference readings
-- [ ] Information-access table and confabulation false-positive rate
-- [ ] Section of the report on judges
+- [ ] All readers running on Qwen3.6-27B; eval-token set and readout-judge prompt frozen
+      (section 4.2)
+- [ ] TwinTempt run checked against the published readings (section 4.5)
+- [ ] Reader outputs on our activations; probe training; scoring against q (steps 6 and 7)
+- [ ] Confabulation false-positive rate (confound 5) and the report section on judges
 
 ## 8. Cost estimate
 
