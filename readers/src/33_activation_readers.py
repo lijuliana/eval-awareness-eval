@@ -23,7 +23,7 @@ import torch
 import common
 import readers_common as rc
 
-# Frozen before any reader output exists (D-175). Rows of the template lens's v3 vocabulary.
+# Frozen before any reader output exists (D-177). Rows of the template lens's v3 vocabulary.
 TEMPLATE_TEST_ROWS = ["test", "tests", "tested", "testing", "evaluation", "evaluate", "evaluated", "exam",
                       "benchmark", "audit"]
 TEMPLATE_FICTION_ROWS = ["fiction", "fictional", "hypothetical", "pretend", "fake", "scenario"]

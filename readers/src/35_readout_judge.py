@@ -23,7 +23,7 @@ import labels_common as lc
 import readers_common as rc
 
 JUDGE_MODEL = "claude-sonnet-5-5"
-PROMPT = Path("prompts/readout_judge_v2.md")   # v1 squashed scores near 0 on dev (D-178)
+PROMPT = Path("prompts/readout_judge_v2.md")   # v1 squashed scores near 0 on dev (D-180)
 WORD_READERS = ["logit_lens", "jlens", "jpp", "olens", "nla"]
 LEVELS = [0, 0.25, 0.5, 0.75, 1]
 SCHEMA = {"type": "object", "properties": {"score": {"type": "number", "enum": LEVELS}}, "required": ["score"],

@@ -83,14 +83,14 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 
 - **Read many tokens per cut point.** Aggregate each reader over the prefix (for example every 8th token, flagging if any readout mentions evaluation), as the NLA paper does, so a reader is not limited to the word at the cut.
 - **Lead time.** Read every reader at fixed distances (1 to 256 tokens) before the point where a trace voices awareness, to measure how early each detects it.
-- **Never-voiced awareness.** Compare reader scores on placeholder versus real-entity prompts among traces that never voice awareness, following the validation design of the Anthropic NLA paper (2026). This comparison stays unread until the Round 2 hand-label agreement check (G3) passes.
-- **Test split.** Read the locked test scores once, after the reader decisions (D-172 to D-178) are signed off.
+- **Awareness that no continuation states (D-182).** Among cut points with q = 0 that the text reader does not flag, compare each reader's flag rate on placeholder versus real-entity prompts; the real-prompt rate is the confabulation floor. G3 passed (κ = 0.67, D-181). The analysis (`readers/analysis/level3.py`) runs after a blind hand check of 40 readout-judge scores.
+- **Test split.** Read the locked test scores once, after the reader decisions (D-174 to D-180) are signed off.
 
 ## Repository
 
 - `PROPOSAL.md`, `hypotheses.md`: design and hypotheses.
 - `lit-review/`: literature review and verified references.
-- `readers/src/`: reader code (runs inside hw2); `readers/decisions.md`: reader decisions D-172 to D-178.
+- `readers/src/`: reader code (runs inside hw2); `readers/decisions.md`: reader decisions D-174 to D-180.
 - `readers/analysis/`: scripts for the numbers and figure above (validation files only).
 - `readers/results/`: tool checks and validation metrics; `readers/figures/`: Figures 1 and 2 as PDF and PNG (Figure 2 source: `readers/analysis/fig_cases.tex`).
 - Reader outputs and per-item scores are kept out of this repo because they quote harmful prompts.

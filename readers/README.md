@@ -6,7 +6,7 @@ Reader code for the hw2 pipeline (github.com/itewari7/hw2). Files go at the same
 - `src/33_activation_readers.py`: runs transfer probe, template lens, logit lens, J-lens, J++, oracle lens, NLA, activation oracle.
 - `src/34_reader_tool_checks.py`: sanity checks for each reader; results in `results/reader_tool_checks.json`.
 - `src/35_readout_judge.py`: Sonnet judge that scores the word-producing readers, prompt in `prompts/readout_judge_v2.md` (v1 kept for reference).
-- `decisions.md`: D-172 to D-178.
+- `decisions.md`: D-174 to D-180.
 
 - `analysis/`: validation metrics and Figure 1 of the top-level README (`reader_metrics.py`, `text_vs_activation.py`, `fig_main.py`; each takes the path of an hw2 checkout and reads only validation files).
 

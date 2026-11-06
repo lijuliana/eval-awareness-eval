@@ -1,9 +1,9 @@
-"""Shared pieces of the activation readers (PROPOSAL 4.2, src/READERS_CONTRACT.md, decisions D-172 to D-177).
+"""Shared pieces of the activation readers (PROPOSAL 4.2, src/READERS_CONTRACT.md, decisions D-174 to D-179).
 
 Layer convention used everywhere in the reader scripts: **block L** = the output of decoder block L
 (0-indexed), before the final norm = HF `hidden_states[L + 1]`. This is the convention of the oracle lens,
 the NLA, the activation oracle, the transfer probe and the J-lens files. (src/04's stored "layer 42" is
-`hidden_states[42]` = block 41, which is why the readers recompute their activations, D-172.)
+`hidden_states[42]` = block 41, which is why the readers recompute their activations, D-174.)
 """
 import json
 from pathlib import Path
@@ -13,7 +13,7 @@ import torch
 QWEN = "Qwen/Qwen3.6-27B"
 QWEN_REVISION = "6a9e13bd6fc8f0983b9b99948120bc37f49c13e9"
 
-# Blocks stored per cut point (last token before the cut). 42 is every reader's primary block (D-173);
+# Blocks stored per cut point (last token before the cut). 42 is every reader's primary block (D-175);
 # 16/32/48 are the activation oracle's trained layers; the rest serve the lenses' secondary layer curves.
 BLOCKS = [16, 20, 24, 28, 32, 36, 40, 42, 44, 48, 52, 56, 60]
 PRIMARY_BLOCK = 42
