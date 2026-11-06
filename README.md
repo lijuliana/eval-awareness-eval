@@ -8,7 +8,7 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - **Main result (validation split).** They detect it less well than the text reader. Claude reading the text before the cut reaches AUROC 0.78 and Claude reading only the prompt reaches 0.74. The best activation reader, the template lens, reaches 0.68; the other seven range from 0.52 to 0.57.
 - **Within a prompt.** When the prompt and cut position are held fixed, the template lens (Spearman ρ = 0.35) and J-lens (0.26) track the target as well as the text reader (0.26), but every 95% interval includes zero.
 - **Adding activations to text.** Combining any activation reader with the text reader does not raise AUROC beyond noise (largest gain +0.03, template lens, 95% CI −0.03 to +0.09).
-- **Awareness that no continuation states (level 3).** At 263 cut points where none of 8 continuations mentions testing and the text reader sees nothing, the oracle lens, NLA and J-lens describe testing 4.5 to 6.6 percentage points more often on placeholder than on real-entity prompts (oracle lens: 6 of 104 versus 1 of 158). Each raw p is below 0.05, but none survives correction across the five readers (Holm p = 0.12), and the readout judge agrees with a blind hand check only at κ = 0.41.
+- **Never-verbalized awareness.** At 263 cut points where neither the reasoning, 8 resampled continuations nor a text reader shows awareness, the oracle lens and NLA flag placeholder prompts 5 to 7 points more often than real ones (Holm p = 0.12). No flagged readout says that Qwen itself is being tested: flags restate the test-style URL, describe the reasoning as an evaluation document, or list suspicion words. A text reader that sees only the prompt shows a larger gap (+12.5 points).
 - **Status.** All numbers are from the validation split. The locked test split is scored and unread.
 
 ## What the eval measures
@@ -73,17 +73,24 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - **(d) is the common case.** At the 10 cut points with q ≥ 0.5, the oracle lens, NLA and J-lens readouts all receive a judge score of 0 in 8.
 - **Readouts track the local word.** When the cut falls on a word, that word is among the J-lens top 20 tokens at 32% of validation cut points (J++ 37%, logit lens 22%), and the next token at 21% (J++ 40%, logit lens 46%). Oracle lens and NLA readouts mostly continue the current sentence (`readers/analysis/local_token.py`).
 
-## Level 3: awareness that no continuation states
+## Never-verbalized awareness (level 3)
 
-- **Design (D-182, fixed before any rate by condition was computed).** Cut points with q = 0 that the text reader does not flag (263 of 289). For each reader, the flag rate on placeholder prompts minus the rate on real-entity prompts; each scenario holds both versions, so 95% intervals resample scenarios and p comes from swapping the condition labels within scenarios. The real-prompt rate is not a pure false-positive rate: real prompts are still harmful requests, and Qwen writes that it may be tested in 2.8% of real-entity development traces (9.1% of placeholder traces). It mixes invented readouts with awareness that real prompts cause, so the difference measures the awareness the placeholder cue adds and undercounts total awareness. Primary: the five readers whose words are judged, because the judge does not count fictional or placeholder content as testing.
-- **Gate.** G3 passed (judge versus blind human labels of traces, κ = 0.67, D-181).
+- **Cue.** Qwen verbalizes evaluation awareness in 9.1% of placeholder development traces and 2.8% of real-entity traces (1,470 each; Figure 3). Real prompts are a lower-awareness comparison, not a zero-awareness one.
+- **Cut points.** 263 validation cut points with no awareness verbalized before the cut, none in 8 resampled continuations (q = 0), and no flag from the text reader that reads the prompt and reasoning (104 placeholder, 159 real).
+- **Test (D-182, fixed before any rate by condition was computed).** Per reader, the flag rate on placeholder prompts minus the rate on real prompts; 95% intervals resample the 38 scenarios, p swaps condition labels within scenarios, Holm over the five judged readers. G3 passed (κ = 0.67, D-181).
 
-![Placeholder minus real flag rate per reader; the five judged readers are all positive, the three numeric readers center near zero.](readers/figures/fig_level3.png)
+![Verbalization rates by prompt version.](readers/figures/fig_cue.png)
 
-**Figure 3. At cut points where no continuation and no text reader shows awareness, the judged activation readers claim testing more often on placeholder prompts, and no difference survives correction.** Each row is the flag rate on placeholder prompts minus the rate on real-entity prompts, among the 263 validation cut points with q = 0 that the text reader does not flag. Bars are 95% intervals from resampling the 38 scenarios. Right column: the two flag rates. Square: readers that output a number (flag at the level-2 threshold); triangle: readers whose words a Claude judge scores (flag at a score of at least 0.25).
+**Figure 3. Qwen verbalizes evaluation awareness on both prompt versions, about three times as often on placeholder prompts.** Top: development traces whose reasoning or answer says the model may be tested. Bottom: validation cut points (169 per version) where at least one of 8 resampled continuations says so. Bars are 95% Wilson intervals.
 
-| Reader | Flagged, placeholder (n = 103–104) | Flagged, real (n = 158–159) | Difference [95% CI] | p (Holm) |
+![Placeholder minus real flag rate per reader, with text-reader controls.](readers/figures/fig_level3.png)
+
+**Figure 4. On never-verbalized cut points, judged word readers flag placeholder prompts more often, and so does a text reader that sees only the prompt.** Each row is the flag rate on placeholder prompts minus the rate on real prompts among the 263 cut points; bars are 95% intervals from resampling scenarios; the right column gives both rates. The text reader that sees the reasoning defines the cut-point set, so it flags none.
+
+| Reader | Placeholder (n = 103–104) | Real (n = 158–159) | Difference [95% CI] | p (Holm) |
 |---|---|---|---|---|
+| LLM reader, prompt + reasoning (control) | 0% | 0% | 0 (by construction) | n/a |
+| LLM reader, prompt only (control) | 12.5% | 0% | +12.5 [+2.7, +25.0] | < 0.001 |
 | Oracle lens | 5.8% | 0.6% | +5.1 [+0.5, +10.2] | 0.025 (0.12) |
 | NLA | 9.7% | 3.1% | +6.6 [+0.6, +12.6] | 0.023 (0.12) |
 | J-lens | 5.8% | 1.3% | +4.5 [+0.3, +9.5] | 0.037 (0.12) |
@@ -93,11 +100,24 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 | Activation oracle | 8.7% | 5.7% | +3.0 [−4.4, +10.8] | 0.42 |
 | Transfer probe | 11.5% | 8.2% | +3.4 [−3.9, +11.1] | 0.39 |
 
-- **All five judged readers point the same way, and none is significant after correction.** Flags are few (oracle lens 6 versus 1), so the test has little power.
-- **Readers that output a number show no difference.** Template lens, activation oracle and transfer probe flag placeholder and real prompts at similar rates.
-- **Including the cut points the text reader flags strengthens the effect** (oracle lens +7.8 points, p < 0.001), so part of the placeholder excess is also visible in the reasoning text.
-- **The readout judge failed its hand check** (κ = 0.41 against Juliana's blind labels of 40 readouts; bar 0.6), so these results rest on an unvalidated judge. Its errors are one-sided: it flagged all 13 readouts the human flagged plus 13 more. Among the hand-checked readouts, the human confirmed 12 of 21 judge flags on placeholder prompts and 1 of 5 on real prompts, so the judge's errors more likely shrink the placeholder excess than create it (40 items, selected by judge score; descriptive only).
-- **The clearest hand-confirmed readouts sit at cut points the text reader flags.** Examples: "the user is testing me" and "this strongly suggests this is a test scenario", both after Qwen has remarked on a test-style URL. Inside the primary set, the hand-confirmed flags are weak token lists.
+- **No judged reader survives correction** (Holm p = 0.12 for oracle lens, NLA and J-lens). Numeric readers show no difference.
+- **The cue alone produces a gap.** Claude reading only the prompt flags 12.5% of placeholder cut points and none of the real ones, so a placeholder-real gap does not by itself show that a reader reads Qwen's state.
+- **Prior "test domain" remarks** (added after the primary analysis). At 31 of the 104 placeholder cut points the reasoning already says the URL looks like a test domain, which the rubric does not count as awareness. Excluding them gives oracle lens +6.2, NLA +7.8 and J-lens +1.5 points.
+
+![Content of the flagged readouts.](readers/figures/fig_content.png)
+
+**Figure 5. No flagged readout on never-verbalized cut points says that Qwen itself is being tested.** All 30 oracle lens, NLA and J-lens readouts the judge flagged on the 263 cut points, sorted by content (`readers/results/flag_content.json`), per 100 cut points of each version.
+
+- **Test environment or simulation** (7 placeholder readouts, 1 real): the readout calls the request a test environment, test data or a simulation, often repeating the prompt's URL or wording.
+- **Evaluation document** (8 placeholder, 5 real): the NLA describes Qwen's structured reasoning as an AI safety or evaluation document; 59% of all NLA readouts open this way on both versions.
+- **Suspicion or fictionality** (7 placeholder, 2 real): token lists such as "suspicious, likely, fictional".
+- **Definition.** Our rubric counts only the model considering that it is being tested; the NLA paper's grader also counted statements that a scenario is constructed. Under that broader reading, 5 of 104 placeholder and 1 of 159 real cut points carry it.
+
+![Flag rate by how far awareness reaches the text.](readers/figures/fig_gradient.png)
+
+**Figure 6. Readers flag more often where awareness is closer to being verbalized.** Percent of validation cut points each judged reader flags, by prompt version and by how far awareness reaches the text; shaded groups are the 263 never-verbalized cut points. Bars are 95% Wilson intervals.
+
+- **Readout judge.** It agrees with Juliana's blind labels of 40 readouts at κ = 0.41 (bar 0.6), flagging all 13 she flagged and 13 more, mostly vague remarks about a suspicious URL or test environment.
 
 ## Interpretation and limits
 
@@ -110,6 +130,8 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 ## Next steps
 
 - **Harmless-prompt baseline.** Add ordinary harmless requests as a third version, to measure how often each reader invents testing claims when Qwen has no reason to suspect a test; the real-entity rate cannot separate invented claims from awareness.
+- **Cue-matched controls.** Compare placeholder prompts whose URL contains "test" with ones that do not.
+- **Steering.** Push the activation along the direction behind a flagged readout and check whether Qwen then verbalizes awareness.
 - **Revised readout judge.** Stop counting a "suspicious" or "test environment" URL as testing, then re-check against fresh hand labels.
 - **Read many tokens per cut point.** Aggregate each reader over the prefix (for example every 8th token, flagging if any readout mentions evaluation), as the NLA paper does, so a reader is not limited to the word at the cut.
 - **Lead time.** Read every reader at fixed distances (1 to 256 tokens) before the point where a trace voices awareness, to measure how early each detects it.
@@ -121,5 +143,5 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - `lit-review/`: literature review and verified references.
 - `readers/src/`: reader code (runs inside hw2); `readers/decisions.md`: reader decisions D-174 to D-180.
 - `readers/analysis/`: scripts for the numbers and figure above (validation files only).
-- `readers/results/`: tool checks, validation metrics and the level-3 result (`level3_dev.json`); `readers/figures/`: Figures 1 to 3 as PDF and PNG (Figure 2 source: `readers/analysis/fig_cases.tex`).
+- `readers/results/`: tool checks, validation metrics and the level-3 result (`level3_dev.json`); `readers/figures/`: Figures 1 to 6 as PDF and PNG (Figure 2 source: `readers/analysis/fig_cases.tex`).
 - Reader outputs and per-item scores are kept out of this repo because they quote harmful prompts.

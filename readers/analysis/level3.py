@@ -70,13 +70,31 @@ for rd in WORD:
 for rd in NUM:
     out['secondary'][rd] = analyse(quiet, rd)
     out['sensitivity_all_q0'][rd] = analyse(base, rd)
+# Text-reader controls, added after the primary analysis (requested 2026-11-06). The prompt-plus-reasoning
+# reader defines the filter, so its flag rate on `quiet` is zero by construction; the prompt-only reader sees
+# the placeholder cue but not the reasoning.
+out['controls'] = {rd: analyse(quiet, rd) for rd in ['llm_reader', 'prompt_only_llm']}
+out['controls_all_q0'] = {rd: analyse(base, rd) for rd in ['llm_reader', 'prompt_only_llm']}
+# Post-hoc sensitivity (2026-11-06): drop cuts whose reasoning before the cut already remarks that the URL or
+# scenario looks like a test (for example "this looks like a test domain"); the rubric does not count these as
+# awareness, but readers can restate them.
+import re
+pt = {(j['trace_id'], j['offset']): j['text'] for j in map(json.loads, open(H / 'data/labels/main/prefix_texts.jsonl'))}
+REMARK = re.compile(r"(a|or|be|likely|probably|maybe|just|is|this) (a )?test\b|testing (me|the|my|whether|how)|being tested"
+                    r"|evaluat(ing|ion) (me|of me|the (ai|model|assistant))|red[- ]team", re.I)
+strip = lambda t: re.sub(r'https?://\S+|`[^`]*`', ' ', t)
+no_remark = [k for k in quiet if not REMARK.search(strip(pt[k]))]
+out['n_no_test_remark'] = len(no_remark)
+out['sensitivity_no_test_remark'] = {rd: analyse(no_remark, rd) for rd in WORD + NUM}
+for rd, r in out['sensitivity_no_test_remark'].items():
+    print(f"no-remark {rd:15s} {r['flag_placeholder']:.3f} (n={r['n_placeholder']}) vs {r['flag_real']:.3f} diff {r['diff']:+.3f} [{r['ci'][0]:+.3f}, {r['ci'][1]:+.3f}] p={r['p']:.3f}")
 # Holm over the five primary readers
 order = sorted(WORD, key=lambda r: out['primary'][r]['p'])
 running = 0.0
 for i, rd in enumerate(order):
     running = max(running, min(1.0, (len(order) - i) * out['primary'][rd]['p']))
     out['primary'][rd]['p_holm'] = running
-for grp in ['primary', 'secondary']:
+for grp in ['primary', 'secondary', 'controls']:
     for rd, r in out[grp].items():
         print(f"{grp:9s} {rd:15s} placeholder {r['flag_placeholder']:.3f} (n={r['n_placeholder']}) real {r['flag_real']:.3f} "
               f"(n={r['n_real']}) diff {r['diff']:+.3f} [{r['ci'][0]:+.3f}, {r['ci'][1]:+.3f}] p={r['p']:.3f}"

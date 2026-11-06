@@ -1,0 +1,1 @@
+{"real_quiet": {"olens": [1, 158], "nla": [5, 159], "jlens": [2, 159]}, "hypo_quiet": {"olens": [6, 104], "nla": [10, 103], "jlens": [6, 104]}, "hypo_hint": {"olens": [5, 26], "nla": [4, 26], "jlens": [2, 26]}, "hypo_later": {"olens": [5, 39], "nla": [7, 39], "jlens": [8, 39]}, "real_later": {"olens": [1, 10], "nla": [0, 10], "jlens": [0, 10]}}
