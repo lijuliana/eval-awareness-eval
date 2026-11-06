@@ -8,4 +8,6 @@ Reader code for the hw2 pipeline (github.com/itewari7/hw2). Files go at the same
 - `src/35_readout_judge.py`: Sonnet judge that scores the word-producing readers, prompt in `prompts/readout_judge_v2.md` (v1 kept for reference).
 - `decisions.md`: D-172 to D-178.
 
-Reader outputs and scores are not in this repo because it is public.
+- `analysis/`: validation metrics and Figure 1 of the top-level README (`reader_metrics.py`, `text_vs_activation.py`, `fig_main.py`; each takes the path of an hw2 checkout and reads only validation files).
+
+Reader outputs and per-item scores are not in this repo because it is public.
