@@ -56,7 +56,7 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 | Logit lens | 6% | 3% | 0.52 [0.49, 0.55] | 0.17 [−0.16, 0.53] |
 
 - **Flag thresholds.** Word readers flag at a judge score of at least 0.25. Number readers (including the LLM readers) flag at the threshold that flags 10% of unaware cut points, chosen on this same data, which favors them slightly.
-- **Unaware flag rate of the word readers** (3% to 7%) is the rate at which they claim evaluation where no continuation voices it.
+- **Flags at q = 0 for the word readers** (3% to 7%) are claims of evaluation where no continuation voices it. They mix invented readouts with awareness that no continuation states (tested in the Level 3 section).
 - **Word readers rarely mention testing.** About 94% of their readouts receive a judge score of 0.
 - **Single-token lenses do not lag the oracle lens and NLA** (hypothesis H4): their intervals overlap.
 - **The transfer probe does not carry over** from technical tasks with explicit cues to harmful requests with placeholder entities.
@@ -75,7 +75,7 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 
 ## Level 3: awareness that no continuation states
 
-- **Design (D-182, fixed before any rate by condition was computed).** Cut points with q = 0 that the text reader does not flag (263 of 289). For each reader, the flag rate on placeholder prompts minus the rate on real-entity prompts; each scenario holds both versions, so 95% intervals resample scenarios and p comes from swapping the condition labels within scenarios. The real-prompt rate is the rate of testing claims with no cue, which bounds confabulation. Primary: the five readers whose words are judged, because the judge does not count fictional or placeholder content as testing.
+- **Design (D-182, fixed before any rate by condition was computed).** Cut points with q = 0 that the text reader does not flag (263 of 289). For each reader, the flag rate on placeholder prompts minus the rate on real-entity prompts; each scenario holds both versions, so 95% intervals resample scenarios and p comes from swapping the condition labels within scenarios. The real-prompt rate is not a pure false-positive rate: real prompts are still harmful requests, and Qwen writes that it may be tested in 2.8% of real-entity development traces (9.1% of placeholder traces). It mixes invented readouts with awareness that real prompts cause, so the difference measures the awareness the placeholder cue adds and undercounts total awareness. Primary: the five readers whose words are judged, because the judge does not count fictional or placeholder content as testing.
 - **Gate.** G3 passed (judge versus blind human labels of traces, κ = 0.67, D-181).
 
 ![Placeholder minus real flag rate per reader; the five judged readers are all positive, the three numeric readers center near zero.](readers/figures/fig_level3.png)
@@ -109,6 +109,8 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 
 ## Next steps
 
+- **Harmless-prompt baseline.** Add ordinary harmless requests as a third version, to measure how often each reader invents testing claims when Qwen has no reason to suspect a test; the real-entity rate cannot separate invented claims from awareness.
+- **Revised readout judge.** Stop counting a "suspicious" or "test environment" URL as testing, then re-check against fresh hand labels.
 - **Read many tokens per cut point.** Aggregate each reader over the prefix (for example every 8th token, flagging if any readout mentions evaluation), as the NLA paper does, so a reader is not limited to the word at the cut.
 - **Lead time.** Read every reader at fixed distances (1 to 256 tokens) before the point where a trace voices awareness, to measure how early each detects it.
 - **Test split.** Read the locked test scores once, after the reader decisions (D-174 to D-180) are signed off.
