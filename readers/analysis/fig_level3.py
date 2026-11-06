@@ -1,6 +1,6 @@
-"""Figures 3 to 6 of the README (run from a folder holding level3_dev.json, gradient_counts.json, flag_content.json):
-text-reader controls, (3) flag rate by how close awareness is to being verbalized. Themed SVG (sentinel colors
-replaced by CSS variables) for the artifact, PDF/PNG for the README."""
+"""README Figures 3 to 6: verbalization by prompt version, placeholder-minus-real flag rates with text-reader controls,
+content of flagged readouts, and flag rate by how far awareness reaches the text. Run from a folder holding
+level3_dev.json, gradient_counts.json and flag_content.json. Themed SVG for the artifact, PDF/PNG for the README."""
 import json, re, matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
