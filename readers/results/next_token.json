@@ -1,0 +1,17 @@
+{
+ "jlens": {
+  "n_word_tokens": 236,
+  "current_in_top20": 0.3220338983050847,
+  "next_in_top20": 0.211864406779661
+ },
+ "jpp": {
+  "n_word_tokens": 236,
+  "current_in_top20": 0.3728813559322034,
+  "next_in_top20": 0.4025423728813559
+ },
+ "logit_lens": {
+  "n_word_tokens": 236,
+  "current_in_top20": 0.21610169491525424,
+  "next_in_top20": 0.461864406779661
+ }
+}

@@ -60,15 +60,28 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - **The transfer probe does not carry over** from technical tasks with explicit cues to harmful requests with placeholder entities.
 - **Ceiling.** Two halves of the 8 continuations agree at ρ = 0.49, which bounds how well any reader can track q.
 
+## Example readouts
+
+![Four validation cut points: a readout that anticipates the next thought, an early hint, a flag with no later voicing, and a miss.](readers/figures/fig_cases.png)
+
+**Figure 2. Readouts sometimes state the thought Qwen voices next, but more often describe the word at the cut.** Each row is one validation cut point. Left: the end of Qwen's reasoning before the cut. Middle: readouts of the block-42 activation at the last token before the cut (oracle lens samples are 1 of 4; J-lens shows its top tokens, non-English tokens omitted). Right: what Qwen wrote after the cut, quoted from a continuation the judge labeled as voicing awareness. Orange marks evaluation content. In (b) the oracle lens continues the unfinished URL ("glow" becomes "glowfake.com"); the trace itself voices awareness at token 1,526. Product and URL names inside readouts are invented by the reader. Selected from the 44 oracle lens and NLA readouts at eligible validation cut points that the judge scored 0.25 or higher, and from the 12 cut points with q ≥ 0.5 or a trace that later voices awareness.
+
+- **(a) and (b) are the pattern the NLA paper reports**: the readout carries an evaluation-related thought before Qwen writes it. In (a) the lead is one sentence; in (b) it is 128 tokens to a rise in q and about 1,400 tokens to the trace's own statement.
+- **(c) is the case this ground truth cannot score.** The oracle lens writes "the user is testing me", and none of the 8 continuations says anything similar.
+- **(d) is the common case.** At the 10 cut points with q ≥ 0.5, the oracle lens, NLA and J-lens readouts all receive a judge score of 0 in 8.
+- **Readouts track the local word.** When the cut falls on a word, that word is among the J-lens top 20 tokens at 32% of validation cut points (J++ 37%, logit lens 22%), and the next token at 21% (J++ 40%, logit lens 46%). Oracle lens and NLA readouts mostly continue the current sentence (`readers/analysis/local_token.py`).
+
 ## Interpretation and limits
 
 - **What a high score means.** Predicting q is a forecast of later voicing. A reader that succeeds could be reading latent awareness, a precursor such as noticing that the names look invented, or a general tendency to question the request. This design cannot separate them.
 - **What the results do not show.** Weak readers are not evidence that unverbalized awareness is absent. q cannot see awareness that is never voiced, voiced awareness is itself rare (about 6% of judged development traces), and the readers' sensitivity to this kind of cue is untested.
+- **Why activation readers should see more, and why they do not here.** A reader of the internal state can in principle see awareness that never reaches the text. Here each reader sees one activation, at one layer, at one token, and that activation is dominated by the local word and sentence (Figure 2d). The NLA paper reads 50 tokens per transcript and flags a transcript if any readout mentions evaluation; its model is Opus 4.6 and its cues include benchmark formats such as SWE-bench and GPQA, which are far stronger than placeholder names.
 - **Much of the predictable signal is in the prompt.** A reader of the prompt alone reaches AUROC 0.74, so some prompts make Qwen far more likely to voice suspicion than others.
 - **Small sample.** 49 aware cut points, 10 with q ≥ 0.5, 38 scenarios. AUROC differences under about 0.1 are not resolvable.
 
 ## Next steps
 
+- **Read many tokens per cut point.** Aggregate each reader over the prefix (for example every 8th token, flagging if any readout mentions evaluation), as the NLA paper does, so a reader is not limited to the word at the cut.
 - **Lead time.** Read every reader at fixed distances (1 to 256 tokens) before the point where a trace voices awareness, to measure how early each detects it.
 - **Never-voiced awareness.** Compare reader scores on placeholder versus real-entity prompts among traces that never voice awareness, following the validation design of the Anthropic NLA paper (2026). This comparison stays unread until the Round 2 hand-label agreement check (G3) passes.
 - **Test split.** Read the locked test scores once, after the reader decisions (D-172 to D-178) are signed off.
@@ -79,5 +92,5 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - `lit-review/`: literature review and verified references.
 - `readers/src/`: reader code (runs inside hw2); `readers/decisions.md`: reader decisions D-172 to D-178.
 - `readers/analysis/`: scripts for the numbers and figure above (validation files only).
-- `readers/results/`: tool checks and validation metrics; `readers/figures/`: Figure 1 as PDF and PNG.
+- `readers/results/`: tool checks and validation metrics; `readers/figures/`: Figures 1 and 2 as PDF and PNG (Figure 2 source: `readers/analysis/fig_cases.tex`).
 - Reader outputs and per-item scores are kept out of this repo because they quote harmful prompts.
