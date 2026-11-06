@@ -5,7 +5,7 @@ Reader code for the hw2 pipeline (github.com/itewari7/hw2). Files go at the same
 - `src/32_reader_activations.py`: recomputes block activations at each cut point (teacher-forced), with a log-prob check against the stored generations.
 - `src/33_activation_readers.py`: runs transfer probe, template lens, logit lens, J-lens, J++, oracle lens, NLA, activation oracle.
 - `src/34_reader_tool_checks.py`: sanity checks for each reader; results in `results/reader_tool_checks.json`.
-- `src/35_readout_judge.py`: Sonnet judge that scores the word-producing readers, prompt in `prompts/readout_judge_v1.md`.
-- `decisions.md`: D-172 to D-177 (proposed).
+- `src/35_readout_judge.py`: Sonnet judge that scores the word-producing readers, prompt in `prompts/readout_judge_v2.md` (v1 kept for reference).
+- `decisions.md`: D-172 to D-178.
 
 Reader outputs and scores are not in this repo because it is public.
