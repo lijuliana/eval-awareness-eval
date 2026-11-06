@@ -7,3 +7,5 @@ data/activations/
 *.pt
 *.safetensors
 .venv/
+.env
+.env.*
