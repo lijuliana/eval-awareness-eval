@@ -93,7 +93,18 @@ def main():
               "verbalizing_reference": [it for it in items if it["kind"] == "verbalizing"]}
     out = {"n": {g: len(rows) for g, rows in groups.items()}, "families": FAMILIES, "primary_rule": PRIMARY,
            "flag_rate": {}, "ensemble": {}}
-    for rd in ACT + TEXT:
+    # D-191: text baselines at a matched cutoff, the lowest at which they flag no more of the silent continuations
+    # from unaware states (no continuation from the cut verbalizes) than the activation readers do on average.
+    ref = np.mean([np.mean([flag[rd].get(it["item_id"], False) for it in groups["silent_q0"]]) for rd in ACT])
+    out["matched_reference_rate"] = float(ref)
+    out["matched_cutoff"] = {}
+    for rd in TEXT:
+        neg = np.array([scores[rd][it["item_id"]] for it in groups["silent_q0"] if it["item_id"] in scores[rd]])
+        cut = next(t for t in sorted(set(neg)) + [np.inf] if (neg >= t).mean() <= ref)
+        out["matched_cutoff"][rd] = float(cut)
+        flag[rd + "_matched"] = {i: v >= cut for i, v in scores[rd].items()}
+        scores[rd + "_matched"] = scores[rd]
+    for rd in ACT + TEXT + [t + "_matched" for t in TEXT]:
         out["flag_rate"][rd] = {g: rate([it for it in rows if it["item_id"] in scores[rd]],
                                         lambda it, rd=rd: flag[rd][it["item_id"]]) for g, rows in groups.items()}
     for g, rows in groups.items():
@@ -143,7 +154,8 @@ def main():
         "items": sorted(it["item_id"] for it in ens)}
     analysis.write_report("results/silent_reading.json", out)
     print(json.dumps(out["n"]))
-    for rd in ACT + TEXT:
+    print("matched", out["matched_reference_rate"], out["matched_cutoff"])
+    for rd in ACT + TEXT + [t + "_matched" for t in TEXT]:
         f = out["flag_rate"][rd]
         print(f"{rd:15s} " + "  ".join(f"{g} {f[g]['value']:.3f}" for g in groups))
     for g in groups:

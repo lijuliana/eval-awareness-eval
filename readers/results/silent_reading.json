@@ -704,6 +704,142 @@
     "resamples_used": 2000,
     "resamples_skipped": 0
    }
+  },
+  "llm_reader_matched": {
+   "all_silent": {
+    "value": 0.1821,
+    "n": 549,
+    "n_clusters": 38,
+    "ci95": [
+     0.1147,
+     0.2528
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "silent_q_pos": {
+    "value": 0.3308,
+    "n": 260,
+    "n_clusters": 22,
+    "ci95": [
+     0.2085,
+     0.4713
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "silent_q0": {
+    "value": 0.0484,
+    "n": 289,
+    "n_clusters": 38,
+    "ci95": [
+     0.0286,
+     0.0689
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "silent_placeholder": {
+    "value": 0.287,
+    "n": 331,
+    "n_clusters": 38,
+    "ci95": [
+     0.1827,
+     0.3925
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "silent_real": {
+    "value": 0.0229,
+    "n": 218,
+    "n_clusters": 38,
+    "ci95": [
+     0.0,
+     0.0502
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "verbalizing_reference": {
+    "value": 0.6289,
+    "n": 97,
+    "n_clusters": 22,
+    "ci95": [
+     0.4574,
+     0.8
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   }
+  },
+  "prompt_only_llm_matched": {
+   "all_silent": {
+    "value": 0.0874,
+    "n": 549,
+    "n_clusters": 38,
+    "ci95": [
+     0.0136,
+     0.1808
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "silent_q_pos": {
+    "value": 0.1308,
+    "n": 260,
+    "n_clusters": 22,
+    "ci95": [
+     0.022,
+     0.2811
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "silent_q0": {
+    "value": 0.0484,
+    "n": 289,
+    "n_clusters": 38,
+    "ci95": [
+     0.0036,
+     0.099
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "silent_placeholder": {
+    "value": 0.145,
+    "n": 331,
+    "n_clusters": 38,
+    "ci95": [
+     0.0232,
+     0.2979
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "silent_real": {
+    "value": 0.0,
+    "n": 218,
+    "n_clusters": 38,
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   },
+   "verbalizing_reference": {
+    "value": 0.0619,
+    "n": 97,
+    "n_clusters": 22,
+    "ci95": [
+     0.0083,
+     0.1605
+    ],
+    "resamples_used": 2000,
+    "resamples_skipped": 0
+   }
   }
  },
  "ensemble": {
@@ -1013,6 +1149,11 @@
     "nla": 0.5463917525773195
    }
   }
+ },
+ "matched_reference_rate": 0.05017301038062284,
+ "matched_cutoff": {
+  "llm_reader": 0.2,
+  "prompt_only_llm": 0.35
  },
  "eval": {
   "placeholder": {

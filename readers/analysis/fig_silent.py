@@ -20,13 +20,13 @@ def fig_eval(P, svg):
     ax.set_xlim(0, 14); ax.set_ylim(-1.5, 0.5); ax.set_xlabel('Percent of resampled continuations (95% interval)')
     save(fig, 'fig_eval', svg)
 
-ORDER = ['olens', 'nla', 'jlens', 'jpp', 'logit_lens', 'template_lens', 'ao', 'transfer_probe', 'llm_reader', 'prompt_only_llm']
+ORDER = ['olens', 'nla', 'jlens', 'jpp', 'logit_lens', 'template_lens', 'ao', 'transfer_probe', 'llm_reader_matched', 'prompt_only_llm_matched']
 def fig_flags(P, svg):
     style(P, svg)
     fig, axes = plt.subplots(1, 2, figsize=(6.6, 3.9), sharey=True, gridspec_kw={'width_ratios': [1.25, 1], 'wspace': 0.12})
     ys, y = [], 0
     for k in ORDER:
-        if k == 'llm_reader': y += 0.7
+        if k == 'llm_reader_matched': y += 0.7
         ys.append(-y); y += 1
     F = D['flag_rate']; h = 0.36
     ax = axes[0]
@@ -48,7 +48,7 @@ def fig_flags(P, svg):
         ax.text(v + 1, yy, f"{v:.0f}", va='center', fontsize=7.5, color=P['muted'])
     ax.set_xlim(0, 80); ax.set_xlabel('Flagged (%)')
     ax.set_title('(b) Just before a continuation verbalizes it (97)', fontsize=9, loc='left', color=P['ink'])
-    LAB = dict(NAME, llm_reader='Claude, prompt + reasoning', prompt_only_llm='Claude, prompt only')
+    LAB = dict(NAME, llm_reader_matched='Claude, prompt + reasoning', prompt_only_llm_matched='Claude, prompt only')
     axes[0].set_yticks(ys); axes[0].set_yticklabels([LAB[k] for k in ORDER])
     for a in axes:
         a.tick_params(axis='y', length=0); a.spines['left'].set_visible(False)
