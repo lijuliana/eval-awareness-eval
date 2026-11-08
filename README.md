@@ -9,7 +9,9 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - **Within a prompt.** When the prompt and cut position are held fixed, the template lens (Spearman ρ = 0.35) and J-lens (0.26) track the target as well as the text reader (0.26), but every 95% interval includes zero.
 - **Adding activations to text.** Combining any activation reader with the text reader does not raise AUROC beyond noise (largest gain +0.03, template lens, 95% CI −0.03 to +0.09).
 - **Never-verbalized awareness.** At 263 cut points where neither the reasoning, 8 resampled continuations nor a text reader shows awareness, the oracle lens and NLA flag placeholder prompts 5 to 7 points more often than real ones (Holm p = 0.12). No flagged readout says that Qwen itself is being tested: flags restate the test-style URL, describe the reasoning as an evaluation document, or list suspicion words. A text reader that sees only the prompt shows a larger gap (+12.5 points).
-- **Status.** All numbers are from the validation split. The locked test split is scored and unread.
+- **Test split (run once, settings frozen on validation).** On 443 held-out cut points (88 aware), Claude reading the text reaches AUROC 0.82 and no activation reader exceeds 0.62. Seven of eight activation readers correlate with q above zero (ρ 0.10 to 0.19). On never-verbalized test cut points no reader flags placeholder prompts significantly more often (oracle lens +3.0 points, Holm p = 0.42; NLA −1.2).
+- **What the test does not cover.** q counts awareness that a continuation later verbalizes, so the text reader predicts it well; these results measure prediction of later verbalization. Awareness that is never verbalized needs a ground truth that does not come from Qwen's text (Next steps).
+- **Status.** Sections without a test label report the validation split.
 
 ## What the eval measures
 
@@ -62,6 +64,19 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - **The transfer probe does not carry over** from technical tasks with explicit cues to harmful requests with placeholder entities.
 - **Ceiling.** Two halves of the 8 continuations agree at ρ = 0.49, which bounds how well any reader can track q.
 
+## Test split
+
+![Validation and test AUROC and rho with q per reader.](readers/figures/fig_test.png)
+
+**Figure 7. The test split reproduces the validation ranking: text readers first, activation readers near chance.** (a) AUROC for aware (q > 0) versus unaware cut points; 0.5 is chance. (b) Spearman ρ with q. Open circles: validation (338 cut points, 49 aware, 38 scenarios); filled: test (443 cut points, 88 aware, 50 scenarios). Bars are 95% intervals from resampling clusters of near-duplicate scenarios. Offsets 128 and 256 pooled.
+
+- **Procedure.** Readers, thresholds and the analysis (`readers/src/42_reader_analysis.py`) were frozen on validation (D-186, D-187) and run on test once; the run is logged in hw2's `results/TEST_ACCESS_LOG.md`. Results: `readers/results/reader_analysis_test.json`.
+- **Text readers.** Claude given the prompt and reasoning: AUROC 0.82, ρ = 0.46. Given the prompt alone: AUROC 0.70, ρ = 0.29.
+- **Activation readers.** AUROC 0.51 to 0.62; ρ 0.10 to 0.19 for seven readers, 0.01 for the transfer probe.
+- **H4 not supported.** J-lens and logit lens minus NLA, oracle lens and activation oracle: all six ρ differences lie between −0.06 and +0.06, every 95% interval includes zero, Holm p = 1.
+- **H3.** Oracle lens, NLA and J-lens correlate with each other at ρ 0.35 to 0.48 and with q at 0.12 to 0.19.
+- **Level 3 on test.** 334 never-verbalized cut points (126 placeholder, 208 real). Oracle lens +3.0 points [−0.4, +6.7], logit lens +2.5, J++ +2.4, J-lens +1.9, NLA −1.2; Holm p ≥ 0.42 for all. The prompt-only text reader again shows a gap (+4.0 points).
+
 ## Example readouts
 
 ![Four validation cut points: a readout that anticipates the next thought, an early hint, a flag with no later voicing, and a miss.](readers/figures/fig_cases.png)
@@ -100,7 +115,7 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 | Activation oracle | 8.7% | 5.7% | +3.0 [−4.4, +10.8] | 0.42 |
 | Transfer probe | 11.5% | 8.2% | +3.4 [−3.9, +11.1] | 0.39 |
 
-- **No judged reader survives correction** (Holm p = 0.12 for oracle lens, NLA and J-lens). Numeric readers show no difference.
+- **No judged reader survives correction** (Holm p = 0.12 for oracle lens, NLA and J-lens). Numeric readers show no difference. On the test split the gap does not replicate (Test split section).
 - **The cue alone produces a gap.** Claude reading only the prompt flags 12.5% of placeholder cut points and none of the real ones, so a placeholder-real gap does not by itself show that a reader reads Qwen's state.
 - **Prior "test domain" remarks** (added after the primary analysis). At 31 of the 104 placeholder cut points the reasoning already says the URL looks like a test domain, which the rubric does not count as awareness. Excluding them gives oracle lens +6.2, NLA +7.8 and J-lens +1.5 points.
 
@@ -135,13 +150,13 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - **Revised readout judge.** Stop counting a "suspicious" or "test environment" URL as testing, then re-check against fresh hand labels.
 - **Read many tokens per cut point.** Aggregate each reader over the prefix (for example every 8th token, flagging if any readout mentions evaluation), as the NLA paper does, so a reader is not limited to the word at the cut.
 - **Lead time.** Read every reader at fixed distances (1 to 256 tokens) before the point where a trace voices awareness, to measure how early each detects it.
-- **Test split.** Read the locked test scores once, after the reader decisions (D-174 to D-180) are signed off.
+- **A ground truth that does not come from Qwen's text.** Compare Qwen's behavior (refusal, compliance) on placeholder and real versions of a prompt at cut points that never verbalize awareness, with look-alike controls whose names are unusual but not test-like.
 
 ## Repository
 
 - `PROPOSAL.md`, `hypotheses.md`: design and hypotheses.
 - `lit-review/`: literature review and verified references.
-- `readers/src/`: reader code (runs inside hw2); `readers/decisions.md`: reader decisions D-174 to D-180.
-- `readers/analysis/`: scripts for the numbers and figure above (validation files only).
-- `readers/results/`: tool checks, validation metrics and the level-3 result (`level3_dev.json`); `readers/figures/`: Figures 1 to 6 as PDF and PNG (Figure 2 source: `readers/analysis/fig_cases.tex`).
+- `readers/src/`: reader code (runs inside hw2); `readers/decisions.md`: reader decisions D-174 to D-182 and D-185 to D-187.
+- `readers/analysis/`: scripts for the validation numbers and figures; `readers/src/42_reader_analysis.py` is the frozen validation and test analysis.
+- `readers/results/`: tool checks, validation metrics and the level-3 result (`level3_dev.json`), and the frozen analysis on validation and test (`reader_analysis.json`, `reader_analysis_test.json`); `readers/figures/`: Figures 1 to 7 as PDF and PNG (Figure 2 source: `readers/analysis/fig_cases.tex`).
 - Reader outputs and per-item scores are kept out of this repo because they quote harmful prompts.

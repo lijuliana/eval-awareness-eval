@@ -11,7 +11,7 @@
 | nla            | 42 | 1 greedy explanation | readout judge |
 | ao             | 48 | P(Yes) to the frozen question | P(Yes) / (P(Yes) + P(No)) (no judge) |
 
-    python src/33_activation_readers.py --reader transfer_probe --part dev
+    python src/38_activation_readers.py --reader transfer_probe --part dev
 Test lock: with --part locked the outputs go to the locked files and nothing about them is printed.
 """
 import argparse
@@ -256,7 +256,7 @@ def main():
     rows, info = result[0], result[1]
     for row in rows:
         row.update(split="val" if args.part == "dev" else "test_id", reader=args.reader, block=info.get("block"))
-    prov = common.provenance({"reader": args.reader, **info, "args": vars(args)}, "33_activation_readers")
+    prov = common.provenance({"reader": args.reader, **info, "args": vars(args)}, "38_activation_readers")
     prov["seconds"] = time.time() - started
     rc.write_outputs(args.reader, args.part, rows, prov)
     if len(result) == 3 and not args.limit:

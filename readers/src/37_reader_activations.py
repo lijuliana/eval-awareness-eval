@@ -8,8 +8,8 @@ Check before anything is read (dev only, test lock): the model's log-probability
 must match what vLLM reported when the trace was generated (median absolute difference <= 0.1 nats, as
 gate G2). This confirms the right model, tokens and positions without the activations stored by src/04.
 
-    python src/32_reader_activations.py --part dev
-    python src/32_reader_activations.py --part locked     # test_id: outputs only, nothing printed about them
+    python src/37_reader_activations.py --part dev
+    python src/37_reader_activations.py --part locked     # test_id: outputs only, nothing printed about them
 """
 import argparse
 import json
@@ -62,7 +62,7 @@ def main():
              offset=np.array([k[1] for k in keys]), blocks=np.array(rc.BLOCKS), last=np.stack(last))
     meta = common.provenance({"model": rc.QWEN, "revision": rc.QWEN_REVISION, "blocks": rc.BLOCKS,
                               "position": "last token before the cut", "part": args.part,
-                              "n": len(keys), "args": vars(args)}, "32_reader_activations")
+                              "n": len(keys), "args": vars(args)}, "37_reader_activations")
     meta["seconds"] = time.time() - started
     if args.part == "dev":
         meta["g2"] = {"median_of_medians": float(np.median(g2)), "max_median": float(np.max(g2)),

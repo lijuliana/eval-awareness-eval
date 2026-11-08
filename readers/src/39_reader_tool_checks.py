@@ -10,7 +10,7 @@ Stages (each loads one model, so they run one after another on one GPU):
   nla       - NLA explanations of three plain sentences (topic words checked automatically, printed for a look).
   twintempt - the transfer probe on TwinTempt (76 tasks x 4 versions), against the published lifts.
 
-    python src/34_reader_tool_checks.py --stage base
+    python src/39_reader_tool_checks.py --stage base
 No study data is read here: every input is a fixed sentence or a public benchmark item.
 """
 import argparse
@@ -22,7 +22,7 @@ import torch
 
 import readers_common as rc
 
-readers = importlib.import_module("33_activation_readers")
+readers = importlib.import_module("38_activation_readers")
 OUT = Path("results/reader_tool_checks.json")
 STORE = rc.ACT_DIR / "toolcheck.pt"
 

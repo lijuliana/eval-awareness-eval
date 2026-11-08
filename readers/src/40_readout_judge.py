@@ -10,8 +10,8 @@ Batch, dry-run, resume and locked-output design as src/26: dry run by default (c
 spends; `--collect` stores finished batches; a rerun never re-sends an item with a stored row. `--part
 locked` sends test_id readouts once and logs the access; their scores go only to the locked CSV.
 
-    python src/35_readout_judge.py --part dev                  # dry run
-    python src/35_readout_judge.py --part dev --submit
+    python src/40_readout_judge.py --part dev                  # dry run
+    python src/40_readout_judge.py --part dev --submit
 """
 import argparse
 import json
@@ -83,11 +83,12 @@ def main():
         print("dry run: nothing sent. Add --submit to send (costs money).")
         return
     if args.part == "locked" and args.submit and todo:
-        common.log_test_access("35_readout_judge", "readout-judge scores of activation readers on test cut points", vars(args))
+        common.log_test_access("35_readout_judge",  # name of the first logged run (D-186), so re-runs count as re-runs
+                               "readout-judge scores of activation readers on test cut points", vars(args))
     ROOT.mkdir(parents=True, exist_ok=True)
     with (ROOT / "runs.jsonl").open("a") as handle:
         handle.write(json.dumps({**common.provenance({"judge_model": JUDGE_MODEL, "prompt": str(PROMPT),
-                                                      "prompt_sha256_16": lc.sha16(system)}, "35_readout_judge"),
+                                                      "prompt_sha256_16": lc.sha16(system)}, "40_readout_judge"),
                                  "argv": vars(args), "n_to_send": len(todo)}) + "\n")
     client = lc.make_client()
 

@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data/generations/main/readout_labels"
-spec = importlib.util.spec_from_file_location("rj", ROOT / "src/35_readout_judge.py")
+spec = importlib.util.spec_from_file_location("rj", ROOT / "src/40_readout_judge.py")
 rj = importlib.util.module_from_spec(spec); spec.loader.exec_module(rj)
 readout_text = rj.readout_text
 
