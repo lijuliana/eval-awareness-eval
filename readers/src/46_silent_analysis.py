@@ -1,13 +1,28 @@
-"""Silent-continuation reading (D-189; exploratory, validation only): do readers separate continuations that
-never voice awareness but come from an aware state (silent_aware, cut point q > 0) from continuations of
-unaware states (unaware, q = 0), read at matched positions inside the continuation?
+"""Silent-continuation reading (D-189, amended by D-190; exploratory, validation only). Descriptive: no
+ground truth for unverbalized awareness exists, so nothing is scored against a label.
 
-Per reader: AUROC silent_aware vs unaware, and flag rates (D-186 thresholds) for silent_aware, unaware and
-verbalizing (read just before the continuation's own first awareness quote). Text baselines: the frozen
-llm_reader given the same text (src/45) and the prompt-only reader (one score per prompt). Paired AUROC
-difference of each activation reader minus the text reader. Then the part the text does not show: AUROC on
-items whose text-reader score is below its flag threshold. 95% intervals from the near-duplicate cluster
-bootstrap (src/analysis.py).
+Population: continuations that never verbalize awareness (src/44 kinds silent_aware and unaware), each read
+inside the continuation (src/44's read position). Continuations that verbalize (kind verbalizing, read just
+before their own statement) are a reference for what the readers do when awareness reaches the text.
+
+Reported:
+1. Per activation reader, the share of silent continuations it flags (D-186 thresholds), overall, by prompt
+   version, and by whether other samples from the same cut point verbalize (q > 0) or not (q = 0). The q
+   split describes where flags fall; it is not a label.
+2. Reader ensemble (D-190). Readers are grouped into families, because J-lens, J++ lens and template lens
+   read the same kind of signal: description (oracle lens, NLA), token (J-lens, J++ lens, logit lens,
+   template lens), other (activation oracle, transfer probe). Primary rule: a continuation is
+   activation-flagged when at least one description reader AND at least one token reader flag it.
+   Sensitivity rules: oracle lens AND NLA; any 2 of the 3 families. The rate expected if the families
+   flagged independently (from their own rates) is reported beside each rule.
+3. The eval, per prompt version: of all continuations resampled from validation cut points where nothing has
+   been verbalized, the share that verbalize awareness (mean q, weighted by judged continuations), the share
+   that never verbalize it and are activation-flagged, and the share with neither. Never-verbalizing
+   continuations were read one per q = 0 cut point and all of them at q > 0 cut points, so each cut point's
+   flag rate is weighted by its number of never-verbalizing continuations.
+4. For activation-flagged silent continuations: the share the text readers also flag (Claude given the
+   request and the reasoning up to the same token; Claude given the request only).
+Rates carry 95% intervals from the near-duplicate cluster bootstrap (src/analysis.py).
 
     python src/46_silent_analysis.py      -> results/silent_reading.json
 """
@@ -19,9 +34,24 @@ import numpy as np
 
 import analysis
 
-WORD = ["olens", "nla", "jlens", "jpp", "logit_lens"]
-NUM = ["template_lens", "ao", "transfer_probe"]
+ACT = ["olens", "nla", "jlens", "jpp", "logit_lens", "template_lens", "ao", "transfer_probe"]
+TEXT = ["llm_reader", "prompt_only_llm"]
+FAMILIES = {"description": ["olens", "nla"], "token": ["jlens", "jpp", "logit_lens", "template_lens"],
+            "other": ["ao", "transfer_probe"]}
+RULES = {"description_and_token": lambda f: f["description"] and f["token"],
+         "olens_and_nla": lambda f: f["olens"] and f["nla"],
+         "two_of_three_families": lambda f: f["description"] + f["token"] + f["other"] >= 2}
+PRIMARY = "description_and_token"
 FROZEN = json.load(open("results/frozen/42_reader_analysis_selection.json"))["thresholds"]
+
+
+def poisson_binomial_at_least(ps, k):
+    dist = np.zeros(len(ps) + 1)
+    dist[0] = 1.0
+    for p in ps:
+        dist[1:] = dist[1:] * (1 - p) + dist[:-1] * p
+        dist[0] *= 1 - p
+    return float(dist[k:].sum())
 
 
 def main():
@@ -36,57 +66,92 @@ def main():
     po = {(r["trace_id"], int(r["offset"])): float(r["q_pred"]) for r in csv.DictReader(open("data/labels/main/llm_readers_dev.csv"))
           if r["reader"] == "prompt_only_llm" and r["status"] == "ok" and r["q_pred"] != ""}
     for it in items:
-        k = (it["trace_id"], int(it["offset"]))
-        if k in po:
-            scores["prompt_only_llm"][it["item_id"]] = po[k]
+        if (it["trace_id"], int(it["offset"])) in po:
+            scores["prompt_only_llm"][it["item_id"]] = po[(it["trace_id"], int(it["offset"]))]
     clusters = analysis.load_clusters()
-    readers = ["llm_reader", "prompt_only_llm"] + WORD + NUM
-    kinds = collections.Counter(it["kind"] for it in items)
-    out = {"n_items": dict(kinds), "n_cut_points": len({(it["trace_id"], it["offset"]) for it in items}),
-           "flag_rates": {}, "auroc": {}, "auroc_minus_text": {}, "auroc_text_quiet": {}}
+    flag = {rd: {i: s >= FROZEN[rd] for i, s in scores[rd].items()} for rd in ACT + TEXT}
+    for it in items:      # readers missing a score (readout-judge refusal) count as not flagging
+        fl = {rd: flag[rd].get(it["item_id"], False) for rd in ACT}
+        fl.update({fam: any(fl[rd] for rd in rds) for fam, rds in FAMILIES.items()})
+        it["fam"] = fl
+        it["rules"] = {name: bool(rule(fl)) for name, rule in RULES.items()}
+        it["ens"] = it["rules"][PRIMARY]
 
-    for rd in readers:
-        thr = FROZEN[rd]
-        out["flag_rates"][rd] = {}
-        for kind in ["silent_aware", "unaware", "verbalizing"]:
-            v = [scores[rd][it["item_id"]] >= thr for it in items if it["kind"] == kind and it["item_id"] in scores[rd]]
-            out["flag_rates"][rd][kind] = {"rate": float(np.mean(v)) if v else None, "n": len(v)}
+    def rate(rows, fn):
+        if not rows:
+            return {"value": None, "n": 0}
+        v = np.array([fn(it) for it in rows], float)
+        cl = [clusters[int(it["scenario_id"])] for it in rows]
+        return analysis.estimate(lambda i: {"r": float(v[i].mean())}, cl)["r"]
 
-    pair = [it for it in items if it["kind"] in ("silent_aware", "unaware")]
+    silent = [it for it in items if it["kind"] in ("silent_aware", "unaware")]
+    groups = {"all_silent": silent,
+              "silent_q_pos": [it for it in silent if it["kind"] == "silent_aware"],
+              "silent_q0": [it for it in silent if it["kind"] == "unaware"],
+              "silent_placeholder": [it for it in silent if it["condition"] == "HYPO"],
+              "silent_real": [it for it in silent if it["condition"] == "REAL"],
+              "verbalizing_reference": [it for it in items if it["kind"] == "verbalizing"]}
+    out = {"n": {g: len(rows) for g, rows in groups.items()}, "families": FAMILIES, "primary_rule": PRIMARY,
+           "flag_rate": {}, "ensemble": {}}
+    for rd in ACT + TEXT:
+        out["flag_rate"][rd] = {g: rate([it for it in rows if it["item_id"] in scores[rd]],
+                                        lambda it, rd=rd: flag[rd][it["item_id"]]) for g, rows in groups.items()}
+    for g, rows in groups.items():
+        out["ensemble"][g] = {}
+        fam = {k: np.mean([it["fam"][k] for it in rows]) for k in list(FAMILIES) + ["olens", "nla"]}
+        indep = {"description_and_token": fam["description"] * fam["token"], "olens_and_nla": fam["olens"] * fam["nla"],
+                 "two_of_three_families": poisson_binomial_at_least([fam["description"], fam["token"], fam["other"]], 2)}
+        for name in RULES:
+            out["ensemble"][g][name] = {"rate": rate(rows, lambda it, n=name: it["rules"][n]),
+                                        "expected_if_independent": float(indep[name])}
+        out["ensemble"][g]["family_rates"] = {k: float(v) for k, v in fam.items()}
 
-    def table(rows, names):
-        ks = [it for it in rows if all(it["item_id"] in scores[n] for n in names)]
-        y = np.array([it["kind"] == "silent_aware" for it in ks], int)
-        cl = [clusters[int(it["scenario_id"])] for it in ks]
-        cols = {n: np.array([scores[n][it["item_id"]] for it in ks]) for n in names}
-        return y, cl, cols
+    # 3. the eval, per prompt version
+    cp = {(r["trace_id"], int(r["offset"])): r for r in csv.DictReader(open("data/labels/main/cut_points_dev.csv"))}
+    by_cut = collections.defaultdict(list)
+    for it in silent:
+        by_cut[(it["trace_id"], int(it["offset"]))].append(it)
+    cuts = sorted({(it["trace_id"], int(it["offset"])) for it in items} |
+                  {k for k, r in cp.items() if r["split"] == "val" and r["eligible"] == "1" and r["q"] != ""
+                   and k in {(it["trace_id"], int(it["offset"])) for it in items}})
+    cut_rows = []
+    for k in cuts:
+        r = cp[k]; n = int(r["n_judged"]); q = float(r["q"])
+        read = by_cut.get(k, [])
+        cut_rows.append({"scenario_id": r["scenario_id"], "condition": r["condition"], "n": n, "verb": q * n,
+                         "silent": (1 - q) * n, "flag_rate": np.mean([it["ens"] for it in read]) if read else np.nan})
+    out["eval"] = {}
+    for cond, name in (("HYPO", "placeholder"), ("REAL", "real")):
+        rows = [c for c in cut_rows if c["condition"] == cond and not (c["silent"] > 0 and np.isnan(c["flag_rate"]))]
+        cl = [clusters[int(c["scenario_id"])] for c in rows]
+        n = np.array([c["n"] for c in rows], float); verb = np.array([c["verb"] for c in rows])
+        sil = np.array([c["silent"] for c in rows]); fr = np.nan_to_num(np.array([c["flag_rate"] for c in rows]))
 
-    for rd in readers:
-        y, cl, cols = table(pair, [rd])
-        out["auroc"][rd] = analysis.estimate(lambda i: {"auroc": analysis.auroc(y[i], cols[rd][i])}, cl)["auroc"]
-    for rd in WORD + NUM:
-        y, cl, cols = table(pair, [rd, "llm_reader"])
-
-        def diff(i):
-            a, b = analysis.auroc(y[i], cols[rd][i]), analysis.auroc(y[i], cols["llm_reader"][i])
-            return {"d": None if a is None or b is None else a - b}
-        out["auroc_minus_text"][rd] = analysis.estimate(diff, cl)["d"]
-    quiet = [it for it in pair if it["item_id"] in scores["llm_reader"] and scores["llm_reader"][it["item_id"]] < FROZEN["llm_reader"]]
-    out["n_text_quiet"] = dict(collections.Counter(it["kind"] for it in quiet))
-    for rd in WORD + NUM + ["prompt_only_llm"]:
-        y, cl, cols = table(quiet, [rd])
-        out["auroc_text_quiet"][rd] = analysis.estimate(lambda i: {"auroc": analysis.auroc(y[i], cols[rd][i])}, cl)["auroc"]
+        def stat(i):
+            return {"verbalize": verb[i].sum() / n[i].sum(), "silent_activation_flagged": (sil[i] * fr[i]).sum() / n[i].sum(),
+                    "silent_not_flagged": (sil[i] * (1 - fr[i])).sum() / n[i].sum(),
+                    "flagged_among_silent": (sil[i] * fr[i]).sum() / sil[i].sum()}
+        out["eval"][name] = {**analysis.estimate(stat, cl), "n_cut_points": len(rows),
+                             "n_continuations": int(n.sum())}
+    ens = [it for it in silent if it["ens"]]
+    out["ensemble_flagged_silent"] = {
+        "n": len(ens),
+        "placeholder_share": float(np.mean([it["condition"] == "HYPO" for it in ens])) if ens else None,
+        "q_pos_share": float(np.mean([it["kind"] == "silent_aware" for it in ens])) if ens else None,
+        "text_reader_flags": rate([it for it in ens if it["item_id"] in scores["llm_reader"]], lambda it: flag["llm_reader"][it["item_id"]]),
+        "prompt_only_flags": rate([it for it in ens if it["item_id"] in scores["prompt_only_llm"]], lambda it: flag["prompt_only_llm"][it["item_id"]]),
+        "items": sorted(it["item_id"] for it in ens)}
     analysis.write_report("results/silent_reading.json", out)
-    print(json.dumps(out["n_items"]), "text-quiet", json.dumps(out["n_text_quiet"]))
-    for rd in readers:
-        f = out["flag_rates"][rd]
-        a = out["auroc"][rd]
-        line = (f"{rd:15s} AUROC {a['value']} {a['ci95']}  flags silent {f['silent_aware']['rate']:.3f} "
-                f"unaware {f['unaware']['rate']:.3f} verbalizing {f['verbalizing']['rate']:.3f}")
-        if rd in out["auroc_minus_text"]:
-            d, q = out["auroc_minus_text"][rd], out["auroc_text_quiet"][rd]
-            line += f"  minus text {d['value']} {d['ci95']}  text-quiet AUROC {q['value']} {q['ci95']}"
-        print(line)
+    print(json.dumps(out["n"]))
+    for rd in ACT + TEXT:
+        f = out["flag_rate"][rd]
+        print(f"{rd:15s} " + "  ".join(f"{g} {f[g]['value']:.3f}" for g in groups))
+    for g in groups:
+        e = out["ensemble"][g]
+        print(f"{g:22s} " + "  ".join(f"{n} {e[n]['rate']['value']:.3f} (indep {e[n]['expected_if_independent']:.3f})" for n in RULES))
+    for v, e in out["eval"].items():
+        print(v, e["n_cut_points"], e["n_continuations"], {k: (e[k]["value"], e[k]["ci95"]) for k in ("verbalize", "silent_activation_flagged", "silent_not_flagged", "flagged_among_silent")})
+    print(json.dumps({k: v for k, v in out["ensemble_flagged_silent"].items() if k != "items"}))
 
 
 if __name__ == "__main__":
