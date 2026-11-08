@@ -23,7 +23,9 @@ LENS_TOP_K = 20         # tokens / phrases shown to the readout judge from each 
 ACT_DIR = Path("data/activations/main/readers")
 OUT_DIR = Path("data/generations/main/activation_readers")
 SCORE_FILES = {"dev": Path("data/labels/main/activation_readers_dev.csv"),
-               "locked": Path("data/labels/main/activation_readers_locked_test.csv")}
+               "locked": Path("data/labels/main/activation_readers_locked_test.csv"),
+               # D-189: silent continuations (validation), keyed by (item_id, read position)
+               "silent": Path("data/labels/main/activation_readers_silent_dev.csv")}
 READER_CSVS = {"dev": Path("data/labels/main/llm_readers_dev.csv"),
                "locked": Path("data/labels/main/llm_readers_locked_test.csv")}
 

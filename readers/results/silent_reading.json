@@ -1,0 +1,457 @@
+{
+ "n_items": {
+  "silent_aware": 260,
+  "verbalizing": 97,
+  "unaware": 289
+ },
+ "n_cut_points": 334,
+ "flag_rates": {
+  "llm_reader": {
+   "silent_aware": {
+    "rate": 0.2692307692307692,
+    "n": 260
+   },
+   "unaware": {
+    "rate": 0.04152249134948097,
+    "n": 289
+   },
+   "verbalizing": {
+    "rate": 0.5257731958762887,
+    "n": 97
+   }
+  },
+  "prompt_only_llm": {
+   "silent_aware": {
+    "rate": 0.3038461538461538,
+    "n": 260
+   },
+   "unaware": {
+    "rate": 0.08650519031141868,
+    "n": 289
+   },
+   "verbalizing": {
+    "rate": 0.17525773195876287,
+    "n": 97
+   }
+  },
+  "olens": {
+   "silent_aware": {
+    "rate": 0.17254901960784313,
+    "n": 255
+   },
+   "unaware": {
+    "rate": 0.059027777777777776,
+    "n": 288
+   },
+   "verbalizing": {
+    "rate": 0.6593406593406593,
+    "n": 91
+   }
+  },
+  "nla": {
+   "silent_aware": {
+    "rate": 0.14728682170542637,
+    "n": 258
+   },
+   "unaware": {
+    "rate": 0.041666666666666664,
+    "n": 288
+   },
+   "verbalizing": {
+    "rate": 0.5578947368421052,
+    "n": 95
+   }
+  },
+  "jlens": {
+   "silent_aware": {
+    "rate": 0.1076923076923077,
+    "n": 260
+   },
+   "unaware": {
+    "rate": 0.020761245674740483,
+    "n": 289
+   },
+   "verbalizing": {
+    "rate": 0.4536082474226804,
+    "n": 97
+   }
+  },
+  "jpp": {
+   "silent_aware": {
+    "rate": 0.10384615384615385,
+    "n": 260
+   },
+   "unaware": {
+    "rate": 0.03806228373702422,
+    "n": 289
+   },
+   "verbalizing": {
+    "rate": 0.36082474226804123,
+    "n": 97
+   }
+  },
+  "logit_lens": {
+   "silent_aware": {
+    "rate": 0.05384615384615385,
+    "n": 260
+   },
+   "unaware": {
+    "rate": 0.02768166089965398,
+    "n": 289
+   },
+   "verbalizing": {
+    "rate": 0.010309278350515464,
+    "n": 97
+   }
+  },
+  "template_lens": {
+   "silent_aware": {
+    "rate": 0.12307692307692308,
+    "n": 260
+   },
+   "unaware": {
+    "rate": 0.06920415224913495,
+    "n": 289
+   },
+   "verbalizing": {
+    "rate": 0.1958762886597938,
+    "n": 97
+   }
+  },
+  "ao": {
+   "silent_aware": {
+    "rate": 0.16923076923076924,
+    "n": 260
+   },
+   "unaware": {
+    "rate": 0.08304498269896193,
+    "n": 289
+   },
+   "verbalizing": {
+    "rate": 0.3711340206185567,
+    "n": 97
+   }
+  },
+  "transfer_probe": {
+   "silent_aware": {
+    "rate": 0.057692307692307696,
+    "n": 260
+   },
+   "unaware": {
+    "rate": 0.06228373702422145,
+    "n": 289
+   },
+   "verbalizing": {
+    "rate": 0.05154639175257732,
+    "n": 97
+   }
+  }
+ },
+ "auroc": {
+  "llm_reader": {
+   "value": 0.7933,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    0.7324,
+    0.8555
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "prompt_only_llm": {
+   "value": 0.732,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    0.6337,
+    0.8218
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "olens": {
+   "value": 0.5575,
+   "n": 543,
+   "n_clusters": 38,
+   "ci95": [
+    0.5227,
+    0.6052
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "nla": {
+   "value": 0.5529,
+   "n": 546,
+   "n_clusters": 38,
+   "ci95": [
+    0.5238,
+    0.5905
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "jlens": {
+   "value": 0.5435,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    0.5163,
+    0.5786
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "jpp": {
+   "value": 0.5329,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    0.508,
+    0.5649
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "logit_lens": {
+   "value": 0.5131,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    0.4923,
+    0.5349
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "template_lens": {
+   "value": 0.4987,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    0.4236,
+    0.5641
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "ao": {
+   "value": 0.5653,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    0.5086,
+    0.632
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "transfer_probe": {
+   "value": 0.5639,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    0.5,
+    0.6302
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  }
+ },
+ "auroc_minus_text": {
+  "olens": {
+   "value": -0.2318,
+   "n": 543,
+   "n_clusters": 38,
+   "ci95": [
+    -0.3023,
+    -0.1584
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "nla": {
+   "value": -0.2382,
+   "n": 546,
+   "n_clusters": 38,
+   "ci95": [
+    -0.2971,
+    -0.1763
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "jlens": {
+   "value": -0.2498,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    -0.2979,
+    -0.2028
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "jpp": {
+   "value": -0.2604,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    -0.3147,
+    -0.2076
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "logit_lens": {
+   "value": -0.2802,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    -0.3351,
+    -0.228
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "template_lens": {
+   "value": -0.2946,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    -0.3975,
+    -0.1987
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "ao": {
+   "value": -0.228,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    -0.3056,
+    -0.1478
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "transfer_probe": {
+   "value": -0.2294,
+   "n": 549,
+   "n_clusters": 38,
+   "ci95": [
+    -0.3358,
+    -0.1235
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  }
+ },
+ "auroc_text_quiet": {
+  "olens": {
+   "value": 0.5253,
+   "n": 464,
+   "n_clusters": 38,
+   "ci95": [
+    0.4999,
+    0.5549
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "nla": {
+   "value": 0.5214,
+   "n": 466,
+   "n_clusters": 38,
+   "ci95": [
+    0.4985,
+    0.5474
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "jlens": {
+   "value": 0.5226,
+   "n": 467,
+   "n_clusters": 38,
+   "ci95": [
+    0.5035,
+    0.549
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "jpp": {
+   "value": 0.5091,
+   "n": 467,
+   "n_clusters": 38,
+   "ci95": [
+    0.4913,
+    0.5314
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "logit_lens": {
+   "value": 0.4979,
+   "n": 467,
+   "n_clusters": 38,
+   "ci95": [
+    0.4857,
+    0.5108
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "template_lens": {
+   "value": 0.4723,
+   "n": 467,
+   "n_clusters": 38,
+   "ci95": [
+    0.3961,
+    0.5431
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "ao": {
+   "value": 0.5316,
+   "n": 467,
+   "n_clusters": 38,
+   "ci95": [
+    0.464,
+    0.6083
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "transfer_probe": {
+   "value": 0.549,
+   "n": 467,
+   "n_clusters": 38,
+   "ci95": [
+    0.4701,
+    0.6218
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  },
+  "prompt_only_llm": {
+   "value": 0.6971,
+   "n": 467,
+   "n_clusters": 38,
+   "ci95": [
+    0.5956,
+    0.7995
+   ],
+   "resamples_used": 2000,
+   "resamples_skipped": 0
+  }
+ },
+ "n_text_quiet": {
+  "silent_aware": 190,
+  "unaware": 277
+ }
+}

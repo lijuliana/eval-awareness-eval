@@ -242,7 +242,7 @@ READERS = {"transfer_probe": run_probe, "template_lens": run_template, "ao": run
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--reader", choices=sorted(READERS), required=True)
-    parser.add_argument("--part", choices=["dev", "locked"], required=True)
+    parser.add_argument("--part", choices=["dev", "locked", "silent"], required=True)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--batch", type=int, default=1, help="cut points per generate call (olens, nla)")
     args = parser.parse_args()
@@ -255,7 +255,7 @@ def main():
     result = READERS[args.reader](acts, args.part)
     rows, info = result[0], result[1]
     for row in rows:
-        row.update(split="val" if args.part == "dev" else "test_id", reader=args.reader, block=info.get("block"))
+        row.update(split={"dev": "val", "locked": "test_id", "silent": "val_silent"}[args.part], reader=args.reader, block=info.get("block"))
     prov = common.provenance({"reader": args.reader, **info, "args": vars(args)}, "38_activation_readers")
     prov["seconds"] = time.time() - started
     rc.write_outputs(args.reader, args.part, rows, prov)

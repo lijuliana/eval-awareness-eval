@@ -49,7 +49,7 @@ def parse_body(body):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--part", choices=["dev", "locked"], required=True)
+    parser.add_argument("--part", choices=["dev", "locked", "silent"], required=True)
     parser.add_argument("--readers", nargs="+", default=WORD_READERS)
     parser.add_argument("--submit", action="store_true")
     parser.add_argument("--collect", action="store_true")
@@ -58,7 +58,10 @@ def main():
     parser.add_argument("--max-tokens", type=int, default=2000)
     args = parser.parse_args()
     system = PROMPT.read_text()
-    split = "val" if args.part == "dev" else "test_id"
+    split = "test_id" if args.part == "locked" else "val"
+    global ROOT
+    if args.part == "silent":      # D-189: silent-continuation readouts get their own store
+        ROOT = ROOT.parent / (ROOT.name + "_silent")
 
     items = []
     for reader in args.readers:

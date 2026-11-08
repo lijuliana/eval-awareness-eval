@@ -27,11 +27,13 @@ G2_MAX_MEDIAN = 0.1
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--part", choices=["dev", "locked"], required=True)
+    parser.add_argument("--part", choices=["dev", "locked", "silent"], required=True)
     parser.add_argument("--gen-dir", default="data/generations/main/base")
     parser.add_argument("--limit", type=int, default=None, help="first N cut points only (smoke test)")
     args = parser.parse_args()
 
+    if args.part == "silent":
+        return silent(args)
     keys = rc.target_keys(args.part)[: args.limit]
     wanted = {t for t, _ in keys}
     traces = {r["trace_id"]: r for r in common.read_records(args.gen_dir, "traces") if r["trace_id"] in wanted}
@@ -71,6 +73,36 @@ def main():
         print("G2 check:", json.dumps(meta["g2"]))
     (rc.ACT_DIR / f"{args.part}_meta.json").write_text(json.dumps(meta, indent=1))
     print(f"saved {len(keys)} cut points x {len(rc.BLOCKS)} blocks to {rc.ACT_DIR / (args.part + '.npz')}")
+
+
+def silent(args):
+    """D-189: activations inside validation continuations (src/44's items): the last token of
+    prompt + prefix + generated[:read_pos]. Key (item_id, read_pos)."""
+    import csv
+    import labels_common as lc
+    items = list(csv.DictReader(open("data/labels/main/silent_items_dev.csv")))[: args.limit]
+    wanted = {it["continuation_id"] for it in items}
+    conts = {c["continuation_id"]: c for c in lc.iter_records(args.gen_dir, "continuations")
+             if c["split"] == "val" and c["continuation_id"] in wanted}
+    model = rc.load_qwen()
+    started, last = time.time(), []
+    for n, it in enumerate(items):
+        c = conts[it["continuation_id"]]
+        ids = c["prompt_ids"] + c["prefix_ids"] + c["generated_ids"][: int(it["read_pos"])]
+        with torch.no_grad():
+            out = model(input_ids=torch.tensor([ids], device="cuda"), output_hidden_states=True, use_cache=False)
+        last.append(torch.stack([out.hidden_states[b + 1][0, -1] for b in rc.BLOCKS]).float().cpu().numpy())
+        if (n + 1) % 100 == 0:
+            print(f"{n + 1}/{len(items)} items, {time.time() - started:.0f}s", flush=True)
+    rc.ACT_DIR.mkdir(parents=True, exist_ok=True)
+    np.savez(rc.ACT_DIR / "silent.npz", trace_id=np.array([it["item_id"] for it in items]),
+             offset=np.array([int(it["read_pos"]) for it in items]), blocks=np.array(rc.BLOCKS), last=np.stack(last))
+    meta = common.provenance({"model": rc.QWEN, "revision": rc.QWEN_REVISION, "blocks": rc.BLOCKS,
+                              "position": "last token of prompt + prefix + generated[:read_pos]", "part": "silent",
+                              "n": len(items), "args": vars(args)}, "37_reader_activations")
+    meta["seconds"] = time.time() - started
+    (rc.ACT_DIR / "silent_meta.json").write_text(json.dumps(meta, indent=1))
+    print(f"saved {len(items)} silent items x {len(rc.BLOCKS)} blocks")
 
 
 if __name__ == "__main__":
