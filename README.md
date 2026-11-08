@@ -4,17 +4,17 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 
 ## Summary
 
-- **Eval.** How often Qwen3.6-27B is aware of being evaluated without saying so, on harmful requests whose names look constructed (placeholder) or real. From points where its reasoning has not mentioned testing, 8 continuations are resampled; each either verbalizes evaluation awareness (Claude judge, κ = 0.67 against a blind human), or never verbalizes it and is or is not flagged by activation readers.
-- **Result (validation).** With placeholder names, 6.0% of continuations verbalize evaluation awareness and 3.3% never verbalize it but are flagged in the activations; with real names, 1.6% and 1.9%. Over whole development traces, 9.1% of placeholder and 2.8% of real traces verbalize it.
+- **Eval.** How often Qwen3.6-27B is aware of being evaluated without saying so, on harmful requests whose names look constructed (test-like) or real. From points where its reasoning has not mentioned testing, 8 continuations are resampled; each either verbalizes evaluation awareness (Claude judge, κ = 0.67 against a blind human), or never verbalizes it and is or is not flagged by activation readers.
+- **Result (validation).** With test-like names, 6.0% of continuations verbalize evaluation awareness and 3.3% never verbalize it but are flagged in the activations; with real names, 1.6% and 1.9%. Over whole development traces, 9.1% of test-like and 2.8% of real traces verbalize it.
 - **What the flags say.** None of the 35 flagged readouts says Qwen itself is being tested; most call the scenario fictional, a placeholder or a test environment. Claude reading the same reasoning flags 46% of them.
 - **No ground truth.** Unstated awareness cannot be observed, so the flagged rate is what the readers report, compared across prompt versions (as the NLA paper compares evaluation transcripts with deployment traffic).
 - **Readers versus text (predicting verbalization).** At the cut point, Claude reading the reasoning predicts whether a continuation will verbalize awareness better than any activation reader: AUROC 0.82 against at most 0.62 on the test split (run once, settings frozen on validation); 0.78 against 0.52 to 0.68 on validation.
-- **Awareness that no sample states (level 3).** On cut points where no continuation verbalizes awareness, the oracle lens and NLA flag placeholder prompts 5 to 7 points more often on validation (Holm p = 0.12); on test the gap is +3.0 and −1.2 (Holm p ≥ 0.42). Claude reading only the prompt shows a gap as large, so the comparison cannot separate awareness from the cue.
+- **Awareness that no sample states (level 3).** On cut points where no continuation verbalizes awareness, the oracle lens and NLA flag test-like prompts 5 to 7 points more often on validation (Holm p = 0.12); on test the gap is +3.0 and −1.2 (Holm p ≥ 0.42). Claude reading only the prompt shows a gap as large, so the comparison cannot separate awareness from the cue.
 - **Status.** The eval is on the validation split and was designed after the single test run (D-189, D-190).
 
 ## What the eval measures
 
-- **Model and prompts.** Qwen3.6-27B with reasoning on answers harmful requests that name either real or placeholder entities (minimal pairs from Abdelnabi et al. 2025, neutral wording).
+- **Model and prompts.** Qwen3.6-27B with reasoning on answers harmful requests that name either real or test-like entities (minimal pairs from Abdelnabi et al. 2025, neutral wording).
 - **Cut points.** Each reasoning trace is cut at generated token 128 or 256. A cut point is kept only if nothing before it mentions being tested: no test-related keyword, and the judge places the first mention of awareness after the cut.
 - **Verbalized awareness (q).** From each cut point, 8 continuations are resampled. A Claude Sonnet 5.5 judge with a frozen rubric labels each continuation; an explicit or hedged statement that the model may be tested or evaluated counts as voicing awareness. q is the fraction of the 8 continuations that voice it.
   - A cut point is **aware** when q > 0.
@@ -40,9 +40,9 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 
 ![Verbalized and activation-flagged silent awareness by prompt version.](readers/figures/fig_eval.png)
 
-**Figure 8. Qwen verbalizes evaluation awareness about four times as often with placeholder names; activation-flagged silent awareness differs less between the versions.** Continuations resampled (8 each) from validation cut points where the reasoning has not mentioned being tested; 165 placeholder and 169 real cut points. Bars are 95% intervals from resampling clusters of near-duplicate scenarios.
+**Figure 8. Qwen verbalizes evaluation awareness about four times as often with test-like names; activation-flagged silent awareness differs less between the versions.** Continuations resampled (8 each) from validation cut points where the reasoning has not mentioned being tested; 165 test-like and 169 real cut points. Bars are 95% intervals from resampling clusters of near-duplicate scenarios.
 
-| Continuations that | Placeholder names | Real names |
+| Continuations that | Test-like names | Real names |
 |---|---|---|
 | verbalize evaluation awareness | 6.0% [2.9, 9.6] | 1.6% [0.5, 2.8] |
 | never verbalize it, flagged in the activations | 3.3% [1.3, 5.8] | 1.9% [0.3, 4.0] |
@@ -57,8 +57,8 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 **Figure 9. Every reader except the transfer probe flags silent continuations more often when another continuation from the same cut point verbalizes awareness, and most flag far more often just before awareness is stated.** Percent of continuations each reader flags at the thresholds frozen for the test run (D-186). The grouping by other continuations describes where flags fall; it is not a label.
 
 - **Per reader, all 549 silent continuations.** Oracle lens 11%, NLA 9%, J-lens 6%, J++ lens 7%, logit lens 4%, template lens 9%, activation oracle 12%, transfer probe 6%. Claude given the reasoning up to the same token: 15%; given the request alone: 19%.
-- **Content of the 35 flagged readouts** (keyword sort of oracle lens and NLA readouts). 24 call the scenario fictional, a placeholder, simulated or a test environment; 11 call the reasoning an evaluation or safety document; none says the model itself is being tested. 66% come from placeholder prompts and 86% from cut points where another continuation verbalizes awareness.
-- **Limits.** One token per continuation at one layer; the readout judge agrees with hand labels at κ = 0.41 (bar 0.6); the family rule was set after per-reader rates were known; validation only, designed after the test run. Four placeholder cut points with verbalizing continuations were left out because no continuation's statement could be located.
+- **Content of the 35 flagged readouts** (keyword sort of oracle lens and NLA readouts). 24 call the scenario fictional, a placeholder, simulated or a test environment; 11 call the reasoning an evaluation or safety document; none says the model itself is being tested. 66% come from test-like prompts and 86% from cut points where another continuation verbalizes awareness.
+- **Limits.** One token per continuation at one layer; the readout judge agrees with hand labels at κ = 0.41 (bar 0.6); the family rule was set after per-reader rates were known; validation only, designed after the test run. Four test-like cut points with verbalizing continuations were left out because no continuation's statement could be located.
 - **Code.** `readers/src/44_silent_items.py` (items and read positions), `45_silent_text_reader.py` (Claude baseline), `46_silent_analysis.py` (rates, ensemble, eval); results in `readers/results/silent_reading.json`.
 
 ## Readers versus text: predicting verbalization at the cut
@@ -84,7 +84,7 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - **Flags at q = 0 for the word readers** (3% to 7%) are claims of evaluation where no continuation voices it. They mix invented readouts with awareness that no continuation states (tested in the Level 3 section).
 - **Word readers rarely mention testing.** About 94% of their readouts receive a judge score of 0.
 - **Single-token lenses do not lag the oracle lens and NLA** (hypothesis H4): their intervals overlap.
-- **The transfer probe does not carry over** from technical tasks with explicit cues to harmful requests with placeholder entities.
+- **The transfer probe does not carry over** from technical tasks with explicit cues to harmful requests with test-like entities.
 - **Ceiling.** Two halves of the 8 continuations agree at ρ = 0.49, which bounds how well any reader can track q.
 
 ## Test split
@@ -98,7 +98,7 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 - **Activation readers.** AUROC 0.51 to 0.62; ρ 0.10 to 0.19 for seven readers, 0.01 for the transfer probe.
 - **H4 not supported.** J-lens and logit lens minus NLA, oracle lens and activation oracle: all six ρ differences lie between −0.06 and +0.06, every 95% interval includes zero, Holm p = 1.
 - **H3.** Oracle lens, NLA and J-lens correlate with each other at ρ 0.35 to 0.48 and with q at 0.12 to 0.19.
-- **Level 3 on test.** 334 never-verbalized cut points (126 placeholder, 208 real). Oracle lens +3.0 points [−0.4, +6.7], logit lens +2.5, J++ +2.4, J-lens +1.9, NLA −1.2; Holm p ≥ 0.42 for all. The prompt-only text reader again shows a gap (+4.0 points).
+- **Level 3 on test.** 334 never-verbalized cut points (126 test-like, 208 real). Oracle lens +3.0 points [−0.4, +6.7], logit lens +2.5, J++ +2.4, J-lens +1.9, NLA −1.2; Holm p ≥ 0.42 for all. The prompt-only text reader again shows a gap (+4.0 points).
 
 ## Example readouts
 
@@ -113,19 +113,19 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 
 ## Awareness that no sample states (level 3)
 
-- **Cue.** Qwen verbalizes evaluation awareness in 9.1% of placeholder development traces and 2.8% of real-entity traces (1,470 each; Figure 3). Real prompts are a lower-awareness comparison, not a zero-awareness one.
-- **Cut points.** 263 validation cut points with no awareness verbalized before the cut, none in 8 resampled continuations (q = 0), and no flag from the text reader that reads the prompt and reasoning (104 placeholder, 159 real).
-- **Test (D-182, fixed before any rate by condition was computed).** Per reader, the flag rate on placeholder prompts minus the rate on real prompts; 95% intervals resample the 38 scenarios, p swaps condition labels within scenarios, Holm over the five judged readers. G3 passed (κ = 0.67, D-181).
+- **Cue.** Qwen verbalizes evaluation awareness in 9.1% of test-like development traces and 2.8% of real-entity traces (1,470 each; Figure 3). Real prompts are a lower-awareness comparison, not a zero-awareness one.
+- **Cut points.** 263 validation cut points with no awareness verbalized before the cut, none in 8 resampled continuations (q = 0), and no flag from the text reader that reads the prompt and reasoning (104 test-like, 159 real).
+- **Test (D-182, fixed before any rate by condition was computed).** Per reader, the flag rate on test-like prompts minus the rate on real prompts; 95% intervals resample the 38 scenarios, p swaps condition labels within scenarios, Holm over the five judged readers. G3 passed (κ = 0.67, D-181).
 
 ![Verbalization rates by prompt version.](readers/figures/fig_cue.png)
 
-**Figure 3. Qwen verbalizes evaluation awareness on both prompt versions, about three times as often on placeholder prompts.** Top: development traces whose reasoning or answer says the model may be tested. Bottom: validation cut points (169 per version) where at least one of 8 resampled continuations says so. Bars are 95% Wilson intervals.
+**Figure 3. Qwen verbalizes evaluation awareness on both prompt versions, about three times as often on test-like prompts.** Top: development traces whose reasoning or answer says the model may be tested. Bottom: validation cut points (169 per version) where at least one of 8 resampled continuations says so. Bars are 95% Wilson intervals.
 
 ![Placeholder minus real flag rate per reader, with text-reader controls.](readers/figures/fig_level3.png)
 
-**Figure 4. On never-verbalized cut points, judged word readers flag placeholder prompts more often, and so does a text reader that sees only the prompt.** Each row is the flag rate on placeholder prompts minus the rate on real prompts among the 263 cut points; bars are 95% intervals from resampling scenarios; the right column gives both rates. The text reader that sees the reasoning defines the cut-point set, so it flags none.
+**Figure 4. On never-verbalized cut points, judged word readers flag test-like prompts more often, and so does a text reader that sees only the prompt.** Each row is the flag rate on test-like prompts minus the rate on real prompts among the 263 cut points; bars are 95% intervals from resampling scenarios; the right column gives both rates. The text reader that sees the reasoning defines the cut-point set, so it flags none.
 
-| Reader | Placeholder (n = 103–104) | Real (n = 158–159) | Difference [95% CI] | p (Holm) |
+| Reader | Test-like (n = 103–104) | Real (n = 158–159) | Difference [95% CI] | p (Holm) |
 |---|---|---|---|---|
 | LLM reader, prompt + reasoning (control) | 0% | 0% | 0 (by construction) | n/a |
 | LLM reader, prompt only (control) | 12.5% | 0% | +12.5 [+2.7, +25.0] | < 0.001 |
@@ -139,17 +139,17 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 | Transfer probe | 11.5% | 8.2% | +3.4 [−3.9, +11.1] | 0.39 |
 
 - **No judged reader survives correction** (Holm p = 0.12 for oracle lens, NLA and J-lens). Numeric readers show no difference. On the test split the gap does not replicate (Test split section).
-- **The cue alone produces a gap.** Claude reading only the prompt flags 12.5% of placeholder cut points and none of the real ones, so a placeholder-real gap does not by itself show that a reader reads Qwen's state.
-- **Prior "test domain" remarks** (added after the primary analysis). At 31 of the 104 placeholder cut points the reasoning already says the URL looks like a test domain, which the rubric does not count as awareness. Excluding them gives oracle lens +6.2, NLA +7.8 and J-lens +1.5 points.
+- **The cue alone produces a gap.** Claude reading only the prompt flags 12.5% of test-like cut points and none of the real ones, so a test-like-real gap does not by itself show that a reader reads Qwen's state.
+- **Prior "test domain" remarks** (added after the primary analysis). At 31 of the 104 test-like cut points the reasoning already says the URL looks like a test domain, which the rubric does not count as awareness. Excluding them gives oracle lens +6.2, NLA +7.8 and J-lens +1.5 points.
 
 ![Content of the flagged readouts.](readers/figures/fig_content.png)
 
 **Figure 5. No flagged readout on never-verbalized cut points says that Qwen itself is being tested.** All 30 oracle lens, NLA and J-lens readouts the judge flagged on the 263 cut points, sorted by content (`readers/results/flag_content.json`), per 100 cut points of each version.
 
-- **Test environment or simulation** (7 placeholder readouts, 1 real): the readout calls the request a test environment, test data or a simulation, often repeating the prompt's URL or wording.
-- **Evaluation document** (8 placeholder, 5 real): the NLA describes Qwen's structured reasoning as an AI safety or evaluation document; 59% of all NLA readouts open this way on both versions.
-- **Suspicion or fictionality** (7 placeholder, 2 real): token lists such as "suspicious, likely, fictional".
-- **Definition.** Our rubric counts only the model considering that it is being tested; the NLA paper's grader also counted statements that a scenario is constructed. Under that broader reading, 5 of 104 placeholder and 1 of 159 real cut points carry it.
+- **Test environment or simulation** (7 test-like readouts, 1 real): the readout calls the request a test environment, test data or a simulation, often repeating the prompt's URL or wording.
+- **Evaluation document** (8 test-like, 5 real): the NLA describes Qwen's structured reasoning as an AI safety or evaluation document; 59% of all NLA readouts open this way on both versions.
+- **Suspicion or fictionality** (7 test-like, 2 real): token lists such as "suspicious, likely, fictional".
+- **Definition.** Our rubric counts only the model considering that it is being tested; the NLA paper's grader also counted statements that a scenario is constructed. Under that broader reading, 5 of 104 test-like and 1 of 159 real cut points carry it.
 
 ![Flag rate by how far awareness reaches the text.](readers/figures/fig_gradient.png)
 
@@ -161,19 +161,19 @@ Juliana Li, with Ishaan and Advikar. The full pipeline lives in [itewari7/hw2](h
 
 - **What a high score means.** q estimates unstated awareness by how often the same state goes on to state it. A reader that tracks q could be reading that awareness, a precursor such as noticing that the names look invented, or a general tendency to question the request. This design cannot separate them.
 - **What the results do not show.** Weak readers are not evidence that unverbalized awareness is absent. q misses awareness that no continuation states (the level-3 test addresses this), voiced awareness is itself rare (about 6% of judged development traces), and the readers' sensitivity to this kind of cue is untested.
-- **Why activation readers should see more, and why they do not here.** A reader of the internal state can in principle see awareness that never reaches the text. Here each reader sees one activation, at one layer, at one token, and that activation is dominated by the local word and sentence (Figure 2d). The NLA paper reads 50 tokens per transcript and flags a transcript if any readout mentions evaluation; its model is Opus 4.6 and its cues include benchmark formats such as SWE-bench and GPQA, which are far stronger than placeholder names.
+- **Why activation readers should see more, and why they do not here.** A reader of the internal state can in principle see awareness that never reaches the text. Here each reader sees one activation, at one layer, at one token, and that activation is dominated by the local word and sentence (Figure 2d). The NLA paper reads 50 tokens per transcript and flags a transcript if any readout mentions evaluation; its model is Opus 4.6 and its cues include benchmark formats such as SWE-bench and GPQA, which are far stronger than test-like names.
 - **Much of the predictable signal is in the prompt.** A reader of the prompt alone reaches AUROC 0.74, so some prompts make Qwen far more likely to voice suspicion than others.
 - **Small sample.** 49 aware cut points, 10 with q ≥ 0.5, 38 scenarios. AUROC differences under about 0.1 are not resolvable.
 
 ## Next steps
 
 - **Harmless-prompt baseline.** Add ordinary harmless requests as a third version, to measure how often each reader invents testing claims when Qwen has no reason to suspect a test; the real-entity rate cannot separate invented claims from awareness.
-- **Cue-matched controls.** Compare placeholder prompts whose URL contains "test" with ones that do not.
+- **Cue-matched controls.** Compare test-like prompts whose URL contains "test" with ones that do not.
 - **Steering.** Push the activation along the direction behind a flagged readout and check whether Qwen then verbalizes awareness.
 - **Revised readout judge.** Stop counting a "suspicious" or "test environment" URL as testing, then re-check against fresh hand labels.
 - **Read many tokens per cut point.** Aggregate each reader over the prefix (for example every 8th token, flagging if any readout mentions evaluation), as the NLA paper does, so a reader is not limited to the word at the cut.
 - **Lead time.** Read every reader at fixed distances (1 to 256 tokens) before the point where a trace voices awareness, to measure how early each detects it.
-- **A ground truth that does not come from Qwen's text.** Compare Qwen's behavior (refusal, compliance) on placeholder and real versions of a prompt at cut points that never verbalize awareness, with look-alike controls whose names are unusual but not test-like.
+- **A ground truth that does not come from Qwen's text.** Compare Qwen's behavior (refusal, compliance) on test-like and real versions of a prompt at cut points that never verbalize awareness, with look-alike controls whose names are unusual but not test-like.
 
 ## Repository
 

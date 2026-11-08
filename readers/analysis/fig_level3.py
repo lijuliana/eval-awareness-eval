@@ -1,4 +1,4 @@
-"""README Figures 3 to 6: verbalization by prompt version, placeholder-minus-real flag rates with text-reader controls,
+"""README Figures 3 to 6: verbalization by prompt version, test-like-minus-real flag rates with text-reader controls,
 content of flagged readouts, and flag rate by how far awareness reaches the text. Run from a folder holding
 level3_dev.json, gradient_counts.json and flag_content.json. Themed SVG for the artifact, PDF/PNG for the README."""
 import json, re, matplotlib
@@ -46,7 +46,7 @@ def fig_cue(P, svg):
             ('Validation cut points where at least\n1 of 8 continuations verbalizes it', (39, 169), (10, 169))]
     for i, (lab, h, r) in enumerate(rows):
         y = -i
-        for (k, n), dy, col, mk, name in [(h, 0.17, P['c1'], 'o', 'Placeholder'), (r, -0.17, P['muted'], 'D', 'Real')]:
+        for (k, n), dy, col, mk, name in [(h, 0.17, P['c1'], 'o', 'Test-like'), (r, -0.17, P['muted'], 'D', 'Real')]:
             p, lo, hi = wilson(k, n)
             ax.plot([lo, hi], [y + dy] * 2, color=col, lw=1.6, solid_capstyle='round')
             ax.plot(p, y + dy, mk, color=col, ms=6.5, mec='none')
@@ -82,17 +82,17 @@ def fig_level3(P, svg):
                 fontsize=8.5, color=P['muted'], transform=ax.get_yaxis_transform())
     for g, first in [(0, 0), (1, 2), (2, 5)]:
         ax.text(0.5, ys[first] + 0.75, HEAD[g], fontsize=8.5, color=P['muted'])
-    ax.text(1.03, ys[0] + 0.75, 'Placeholder vs real', fontsize=8.5, color=P['muted'], transform=ax.get_yaxis_transform())
+    ax.text(1.03, ys[0] + 0.75, 'Test-like vs real', fontsize=8.5, color=P['muted'], transform=ax.get_yaxis_transform())
     ax.annotate('zero by construction', (0, ys[0]), xytext=(1.2, ys[0]), va='center', fontsize=8, color=P['muted'])
     ax.set_yticks(ys); ax.set_yticklabels([o[1] for o in ORDER]); ax.tick_params(axis='y', length=0)
     ax.spines['left'].set_visible(False)
     ax.set_xlim(-8, 26); ax.set_ylim(ys[-1] - 0.6, ys[0] + 1.3)
-    ax.set_xlabel('Placeholder minus real flag rate (percentage points)')
+    ax.set_xlabel('Test-like minus real flag rate (percentage points)')
     save(fig, 'fig_level3', svg)
 
 # 3. Flag rate by how close awareness is to being verbalized
-GROUPS = [('real_quiet', 'Real\nnothing in text'), ('hypo_quiet', 'Placeholder\nnothing in text'),
-          ('hypo_hint', 'Placeholder\ntext-reader hint'), ('hypo_later', 'Placeholder\nverbalized later'),
+GROUPS = [('real_quiet', 'Real\nnothing in text'), ('hypo_quiet', 'Test-like\nnothing in text'),
+          ('hypo_hint', 'Test-like\ntext-reader hint'), ('hypo_later', 'Test-like\nverbalized later'),
           ('real_later', 'Real\nverbalized later')]
 RD = [('olens', 'Oracle lens', '^', -0.18), ('nla', 'NLA', 'v', 0.0), ('jlens', 'J-lens', 'P', 0.18)]
 def fig_gradient(P, svg):
@@ -126,7 +126,7 @@ def fig_content(P, svg):
             ('suspicion', 'Suspicion or\nfictionality')]
     cols = {'scenario': P['c2'], 'genre': P['muted'], 'suspicion': P['rule']}
     fig, ax = plt.subplots(figsize=(6.3, 1.9))
-    for y, (cond, lab, ncut) in enumerate([('HYPO', 'Placeholder', 104), ('REAL', 'Real', 159)]):
+    for y, (cond, lab, ncut) in enumerate([('HYPO', 'Test-like', 104), ('REAL', 'Real', 159)]):
         left = 0
         for c, _ in cats:
             v = 100 * sum(1 for x in items if x[3] == cond and x[4] == c) / ncut
@@ -138,7 +138,7 @@ def fig_content(P, svg):
         nflag = sum(1 for x in items if x[3] == cond)
         ax.text(left + 0.4, -y, f'{nflag} readouts on {ncut} cuts', va='center', fontsize=8.5, color=P['muted'])
     ax.text(30, 0.75, 'States the model itself\nis being tested: 0 readouts', ha='right', va='bottom', fontsize=8.5, color=P['ink'])
-    ax.set_yticks([0, -1]); ax.set_yticklabels(['Placeholder', 'Real']); ax.tick_params(axis='y', length=0)
+    ax.set_yticks([0, -1]); ax.set_yticklabels(['Test-like', 'Real']); ax.tick_params(axis='y', length=0)
     ax.spines['left'].set_visible(False)
     ax.set_xlim(0, 30); ax.set_ylim(-1.45, 1.25)
     ax.set_xlabel('Flagged readouts per 100 cuts (oracle lens, NLA and J-lens pooled)')

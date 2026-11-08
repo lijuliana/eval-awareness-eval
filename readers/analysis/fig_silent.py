@@ -10,7 +10,7 @@ def fig_eval(P, svg):
     fig, ax = plt.subplots(figsize=(6.3, 2.0))
     rows = [('verbalize', 'Verbalize awareness'), ('silent_activation_flagged', 'Never verbalize it,\nflagged in the activations')]
     for i, (k, lab) in enumerate(rows):
-        for v, dy, col, mk, name in [('placeholder', 0.16, P['c1'], 'o', 'Placeholder names'), ('real', -0.16, P['muted'], 'D', 'Real names')]:
+        for v, dy, col, mk, name in [('placeholder', 0.16, P['c1'], 'o', 'Test-like names'), ('real', -0.16, P['muted'], 'D', 'Real names')]:
             r = D['eval'][v][k]; lo, hi = [100 * x for x in r['ci95']]
             ax.plot([lo, hi], [-i + dy] * 2, color=col, lw=1.6, solid_capstyle='round')
             ax.plot(100 * r['value'], -i + dy, mk, color=col, ms=6.5, mec='none')
