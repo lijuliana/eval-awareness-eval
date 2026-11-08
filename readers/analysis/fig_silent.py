@@ -48,9 +48,13 @@ def fig_flags(P, svg):
         ax.text(v + 1, yy, f"{v:.0f}", va='center', fontsize=7.5, color=P['muted'])
     ax.set_xlim(0, 80); ax.set_xlabel('Flagged (%)')
     ax.set_title('(b) Just before a continuation verbalizes it (97)', fontsize=9, loc='left', color=P['ink'])
-    axes[0].set_yticks(ys); axes[0].set_yticklabels([NAME[k] for k in ORDER])
+    LAB = dict(NAME, llm_reader='Claude, prompt + reasoning', prompt_only_llm='Claude, prompt only')
+    axes[0].set_yticks(ys); axes[0].set_yticklabels([LAB[k] for k in ORDER])
     for a in axes:
         a.tick_params(axis='y', length=0); a.spines['left'].set_visible(False)
+    mid = (ys[-2] + ys[-3]) / 2
+    axes[0].text(0.5, mid, 'Cue baselines: Claude reads the text, not the activations', ha='left', va='center',
+                 fontsize=8, color=P['muted'], style='italic')
     axes[0].set_ylim(ys[-1] - 0.6, ys[0] + 0.6)
     save(fig, 'fig_silent', svg)
 
